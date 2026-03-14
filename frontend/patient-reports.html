@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health AI - My Reports</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* ========== ANALYSIS MODAL STYLES ========== */
+        
+        .analysis-modal {
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .analysis-body {
+            padding: 2rem;
+        }
+
+        /* SECTION STYLING */
+        .analysis-section {
+            margin-bottom: 2.5rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color, #e2e8f0);
+        }
+
+        .analysis-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .analysis-section h3 {
+            color: var(--primary, #2B7CFF);
+            font-size: 1.2rem;
+            margin: 0 0 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* INFO GRID */
+        .info-grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .info-box {
+            background: var(--bg-tertiary, #F1F5F9);
+            padding: 1.5rem;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            border-left: 4px solid var(--primary, #2B7CFF);
+        }
+
+        .info-box .label {
+            font-size: 0.875rem;
+            color: var(--text-secondary, #64748B);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-box .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary, #1E293B);
+        }
+
+        /* RISK LEVEL BOX */
+        .risk-level-box {
+            padding: 2rem;
+            border-radius: 12px;
+            border-left: 6px solid;
+            background: rgba(43, 124, 255, 0.05);
+            animation: slideUp 0.4s ease;
+        }
+
+        .risk-level-box h3 {
+            margin: 0 0 0.75rem;
+        }
+
+        .risk-level-box p {
+            margin: 0;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .risk-level-box.risk-normal {
+            border-color: var(--success, #10B981);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .risk-level-box.risk-warning {
+            border-color: var(--warning, #F59E0B);
+            background: rgba(245, 158, 11, 0.05);
+        }
+
+        .risk-level-box.risk-critical {
+            border-color: var(--danger, #EF4444);
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        /* METRICS GRID */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .metric-card {
+            background: white;
+            border: 2px solid var(--border-color, #E2E8F0);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .metric-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .metric-card.status-warning {
+            border-color: var(--warning, #F59E0B);
+            background: rgba(245, 158, 11, 0.05);
+        }
+
+        .metric-card.status-critical {
+            border-color: var(--danger, #EF4444);
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .metric-icon {
+            font-size: 2.5rem;
+            flex-shrink: 0;
+        }
+
+        .metric-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .metric-label {
+            font-weight: 600;
+            color: var(--text-primary, #1E293B);
+            font-size: 0.9rem;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary, #2B7CFF);
+        }
+
+        .metric-normal {
+            font-size: 0.75rem;
+            color: var(--text-muted, #94A3B8);
+            font-style: italic;
+        }
+
+        /* ADDITIONAL VALUES GRID */
+        .additional-values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .value-item {
+            background: var(--bg-tertiary, #F1F5F9);
+            padding: 1rem;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            border-top: 3px solid var(--primary, #2B7CFF);
+        }
+
+        .value-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary, #64748B);
+            font-weight: 600;
+        }
+
+        .value-display {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary, #1E293B);
+        }
+
+        /* ABNORMALITIES LIST */
+        .abnormalities-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .abnormality-item {
+            padding: 1.25rem;
+            border-radius: 8px;
+            border-left: 4px solid;
+            background: var(--bg-tertiary, #F1F5F9);
+        }
+
+        .abnormality-item.severity-warning {
+            border-left-color: var(--warning, #F59E0B);
+            background: rgba(245, 158, 11, 0.08);
+        }
+
+        .abnormality-item.severity-critical {
+            border-left-color: var(--danger, #EF4444);
+            background: rgba(239, 68, 68, 0.08);
+        }
+
+        .abnormality-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .abnormality-icon {
+            font-size: 1.25rem;
+        }
+
+        .abnormality-param {
+            font-weight: 600;
+            color: var(--text-primary, #1E293B);
+            flex: 1;
+        }
+
+        .abnormality-status {
+            background: var(--warning, #F59E0B);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .abnormality-item.severity-critical .abnormality-status {
+            background: var(--danger, #EF4444);
+        }
+
+        .abnormality-value {
+            font-size: 0.9rem;
+            color: var(--text-secondary, #64748B);
+            padding-left: 2.5rem;
+        }
+
+        /* CRITICAL ALERTS */
+        .alerts-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .critical-alert-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: rgba(239, 68, 68, 0.1);
+            border: 2px solid var(--danger, #EF4444);
+            border-radius: 8px;
+        }
+
+        .alert-icon {
+            font-size: 1.5rem;
+        }
+
+        .alert-text {
+            color: var(--text-primary, #1E293B);
+            font-weight: 600;
+        }
+
+        /* CONDITIONS BOX */
+        .conditions-box {
+            background: var(--bg-tertiary, #F1F5F9);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--secondary, #14B8A6);
+        }
+
+        .conditions-box p {
+            margin: 0;
+            color: var(--text-primary, #1E293B);
+            line-height: 1.6;
+        }
+
+        /* SUMMARY BOX */
+        .summary-box {
+            background: linear-gradient(135deg, rgba(43, 124, 255, 0.05), rgba(20, 184, 166, 0.05));
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary, #2B7CFF);
+        }
+
+        .summary-box p {
+            margin: 0;
+            color: var(--text-primary, #1E293B);
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+
+        /* RECOMMENDATIONS BOX */
+        .recommendations-box {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .recommendation-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--bg-tertiary, #F1F5F9);
+            border-radius: 8px;
+            border-left: 4px solid var(--secondary, #14B8A6);
+            color: var(--text-primary, #1E293B);
+            line-height: 1.5;
+        }
+
+        .recommendation-item:first-letter {
+            font-weight: 600;
+        }
+
+        /* LOADING SPINNER */
+        .loading-spinner {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary, #64748B);
+        }
+
+        .loading-spinner p {
+            font-size: 1.1rem;
+            margin: 0;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        /* EMPTY STATE */
+        .empty-state {
+            text-align: center;
+            color: var(--text-muted, #94A3B8);
+            padding: 2rem;
+            font-style: italic;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .analysis-body {
+                padding: 1.5rem;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .info-grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .analysis-modal {
+                max-width: 95vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="dashboard-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1>Health AI</h1>
+                <span class="tag-line">Medical Reports</span>
+            </div>
+            <div class="nav-menu">
+                <a href="dashboard.html" class="btn-secondary">← Back to Dashboard</a>
+                <button id="logout-btn" class="btn-logout">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="reports-main">
+        <!-- Header Section -->
+        <section class="reports-header">
+            <h2>📋 My Medical Reports</h2>
+            <p>Upload, view, and manage your medical reports and test results</p>
+        </section>
+
+        <!-- Upload Section -->
+        <section class="upload-section report-card">
+            <h3>📤 Upload New Report</h3>
+            
+            <form id="upload-form" class="upload-form">
+                <!-- Report Type Selection -->
+                <div class="form-group">
+                    <label for="report-type">Report Type *</label>
+                    <select id="report-type" name="report_type" required>
+                        <option value="">-- Select Report Type --</option>
+                        <option value="Blood Report">🩸 Blood Report</option>
+                        <option value="X-Ray">📸 X-Ray</option>
+                        <option value="ECG">❤️ ECG Report</option>
+                        <option value="Ultrasound">🔊 Ultrasound Report</option>
+                        <option value="CT Scan">🧠 CT Scan</option>
+                        <option value="MRI">🔎 MRI Report</option>
+                        <option value="Thyroid Test">🦴 Thyroid Test</option>
+                        <option value="Liver Function">🏥 Liver Function Test</option>
+                        <option value="Kidney Function">🏥 Kidney Function Test</option>
+                        <option value="Diabetes Report">🩹 Diabetes Report</option>
+                        <option value="Pathology Report">🔬 Pathology Report</option>
+                        <option value="Progress Report">📊 Progress Report</option>
+                        <option value="Prescription">💊 Prescription</option>
+                        <option value="Other">📄 Other</option>
+                    </select>
+                </div>
+
+                <!-- Report Name -->
+                <div class="form-group">
+                    <label for="report-name">Report Name/Title *</label>
+                    <input 
+                        type="text" 
+                        id="report-name" 
+                        name="report_name" 
+                        placeholder="e.g., Blood Test - March 2026"
+                        required
+                    >
+                </div>
+
+                <!-- File Upload -->
+                <div class="form-group">
+                    <label for="report-file">Select File (PDF, PNG, JPG, DOC) *</label>
+                    <div class="file-upload-area" onclick="document.getElementById('report-file').click()">
+                        <input 
+                            type="file" 
+                            id="report-file" 
+                            name="report_file" 
+                            accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
+                            required
+                            style="display: none;"
+                        >
+                        <div class="file-upload-content">
+                            <p class="file-icon">📎</p>
+                            <p class="file-text">Click to select or drag and drop</p>
+                            <p class="file-size">Max file size: 10 MB</p>
+                        </div>
+                    </div>
+                    <p id="file-name" class="file-name-display"></p>
+                </div>
+
+                <!-- Upload Status Message -->
+                <div id="upload-message" class="form-message" style="display: none;"></div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn-primary" id="upload-btn">
+                    📤 Upload Report
+                </button>
+            </form>
+        </section>
+
+        <!-- Reports List Section -->
+        <section class="reports-list-section">
+            <div class="reports-list-header">
+                <h3>📁 Your Uploaded Reports</h3>
+                <button class="btn-secondary" onclick="refreshReports()">🔄 Refresh</button>
+            </div>
+
+            <!-- Filter Options -->
+            <div class="filter-options">
+                <label for="report-filter">Filter by Type:</label>
+                <select id="report-filter" onchange="filterReports()">
+                    <option value="">All Reports</option>
+                    <option value="Blood Report">🩸 Blood Report</option>
+                    <option value="X-Ray">📸 X-Ray</option>
+                    <option value="ECG">❤️ ECG Report</option>
+                    <option value="Ultrasound">🔊 Ultrasound Report</option>
+                    <option value="Prescription">💊 Prescription</option>
+                </select>
+            </div>
+
+            <!-- Loading Indicator -->
+            <div id="reports-loading" class="loading-spinner" style="display: none;">
+                <p>Loading your reports...</p>
+            </div>
+
+            <!-- Reports Display -->
+            <div id="reports-display" class="reports-display">
+                <p class="empty-state">📂 No reports uploaded yet. Upload your first report above!</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Report Details Modal -->
+    <div id="report-modal" class="modal" style="display: none;">
+        <div class="modal-content report-modal">
+            <span class="close" onclick="closeReportModal()">&times;</span>
+            
+            <div class="modal-header">
+                <h2 id="modal-report-title"></h2>
+                <p id="modal-report-type" class="modal-subtitle"></p>
+            </div>
+
+            <div class="modal-body">
+                <div class="report-details">
+                    <div class="detail-item">
+                        <strong>📝 Report Type:</strong>
+                        <span id="modal-type-display"></span>
+                    </div>
+                    <div class="detail-item">
+                        <strong>📅 Upload Date:</strong>
+                        <span id="modal-upload-date"></span>
+                    </div>
+                    <div class="detail-item">
+                        <strong>📊 File Size:</strong>
+                        <span id="modal-file-size"></span>
+                    </div>
+                    <div class="detail-item">
+                        <strong>✓ Status:</strong>
+                        <span id="modal-status" class="status-badge"></span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="modal-actions">
+                    <button class="btn-primary" id="analyze-btn" onclick="analyzeReport()">
+                        🔍 Analyze Report & View Data
+                    </button>
+                    <button class="btn-secondary" id="download-btn" onclick="downloadReport()">
+                        ⬇️ Download Report
+                    </button>
+                    <button class="btn-secondary" id="share-btn" onclick="shareReport()">
+                        🔗 Share with Doctor
+                    </button>
+                    <button class="btn-danger" id="delete-btn" onclick="deleteReport()">
+                        🗑️ Delete Report
+                    </button>
+                </div>
+
+                <!-- Report Preview (if applicable) -->
+                <div class="report-preview" id="report-preview">
+                    <p>Preview not available for this file type</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Download Link (Hidden) -->
+    <a id="download-link" style="display: none;"></a>
+
+    <!-- Analysis Results Modal -->
+    <div id="analysis-modal" class="modal" style="display: none;">
+        <div class="modal-content analysis-modal">
+            <span class="close" onclick="closeAnalysisModal()">&times;</span>
+            
+            <div class="modal-header">
+                <h2>📊 Medical Report Analysis</h2>
+                <p class="modal-subtitle">Extracted Information & Health Metrics</p>
+            </div>
+
+            <div class="modal-body analysis-body">
+                <!-- Loading State -->
+                <div id="analysis-loading" class="loading-spinner" style="display: none;">
+                    <p>🔍 Analyzing your report...</p>
+                </div>
+
+                <!-- Error State -->
+                <div id="analysis-error" class="form-message error" style="display: none;"></div>
+
+                <!-- Patient Information -->
+                <div id="analysis-content" style="display: none;">
+                    <!-- Header Section -->
+                    <section class="analysis-section">
+                        <h3>👤 Patient Information</h3>
+                        <div class="info-grid-2">
+                            <div class="info-box">
+                                <span class="label">Patient Name</span>
+                                <span class="value" id="analysis-patient-name">-</span>
+                            </div>
+                            <div class="info-box">
+                                <span class="label">Age</span>
+                                <span class="value" id="analysis-patient-age">-</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Risk Level Alert -->
+                    <section class="analysis-section">
+                        <div class="risk-level-box" id="risk-level-indicator">
+                            <h3 id="risk-title">Risk Level</h3>
+                            <p id="risk-description"></p>
+                        </div>
+                    </section>
+
+                    <!-- Critical Alerts -->
+                    <div id="critical-alerts-section" style="display: none;">
+                        <section class="analysis-section">
+                            <h3>⚠️ Critical Alerts</h3>
+                            <div id="critical-alerts" class="alerts-list"></div>
+                        </section>
+                    </div>
+
+                    <!-- Key Health Metrics -->
+                    <section class="analysis-section">
+                        <h3>📈 Key Health Metrics</h3>
+                        <div class="metrics-grid">
+                            <div class="metric-card" id="metric-blood-pressure">
+                                <div class="metric-icon">🩺</div>
+                                <div class="metric-info">
+                                    <span class="metric-label">Blood Pressure</span>
+                                    <span class="metric-value" id="val-blood-pressure">-</span>
+                                    <span class="metric-normal">(Normal: 90-120/60-80)</span>
+                                </div>
+                            </div>
+
+                            <div class="metric-card" id="metric-blood-sugar">
+                                <div class="metric-icon">🩸</div>
+                                <div class="metric-info">
+                                    <span class="metric-label">Blood Sugar</span>
+                                    <span class="metric-value" id="val-blood-sugar">-</span>
+                                    <span class="metric-normal">(Normal: 100-125 mg/dL)</span>
+                                </div>
+                            </div>
+
+                            <div class="metric-card" id="metric-hemoglobin">
+                                <div class="metric-icon">🔴</div>
+                                <div class="metric-info">
+                                    <span class="metric-label">Hemoglobin</span>
+                                    <span class="metric-value" id="val-hemoglobin">-</span>
+                                    <span class="metric-normal">(Normal: 12-17.5 g/dL)</span>
+                                </div>
+                            </div>
+
+                            <div class="metric-card" id="metric-cholesterol">
+                                <div class="metric-icon">⚡</div>
+                                <div class="metric-info">
+                                    <span class="metric-label">Cholesterol</span>
+                                    <span class="metric-value" id="val-cholesterol">-</span>
+                                    <span class="metric-normal">(Normal: <200 mg/dL)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Other Values -->
+                    <section class="analysis-section">
+                        <h3>🔬 Additional Lab Values</h3>
+                        <div class="additional-values-grid" id="additional-values-grid"></div>
+                    </section>
+
+                    <!-- Abnormalities Detected -->
+                    <div id="abnormalities-section" style="display: none;">
+                        <section class="analysis-section">
+                            <h3>📋 Abnormalities Detected</h3>
+                            <div id="abnormalities-list" class="abnormalities-list"></div>
+                        </section>
+                    </div>
+
+                    <!-- Conditions & Summary -->
+                    <section class="analysis-section">
+                        <h3>📝 Reported Conditions</h3>
+                        <div class="conditions-box">
+                            <p id="analysis-conditions">Not specified</p>
+                        </div>
+                    </section>
+
+                    <!-- Summary -->
+                    <section class="analysis-section">
+                        <h3>📌 Summary</h3>
+                        <div class="summary-box">
+                            <p id="analysis-summary"></p>
+                        </div>
+                    </section>
+
+                    <!-- Recommendations -->
+                    <section class="analysis-section">
+                        <h3>💡 Recommendations</h3>
+                        <div class="recommendations-box" id="recommendations-box"></div>
+                    </section>
+
+                    <!-- Close Button -->
+                    <div style="text-align: center; margin-top: 2rem;">
+                        <button class="btn-secondary" onclick="closeAnalysisModal()">
+                            ← Back to Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+    <script>
+        // Global variables
+        let currentUser = null;
+        let allReports = [];
+        let selectedReport = null;
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', initializeReportsPage);
+
+        function initializeReportsPage() {
+            // Check if user is logged in
+            currentUser = JSON.parse(sessionStorage.getItem('user') || '{}');
+            
+            if (!currentUser.id) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Load reports
+            loadPatientReports();
+
+            // Handle file upload
+            document.getElementById('upload-form').addEventListener('submit', handleUpload);
+
+            // File input change
+            document.getElementById('report-file').addEventListener('change', (e) => {
+                const fileName = e.target.files[0]?.name || '';
+                document.getElementById('file-name').textContent = fileName ? `✓ Selected: ${fileName}` : '';
+            });
+
+            // Drag and drop
+            const uploadArea = document.querySelector('.file-upload-area');
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            uploadArea.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                document.getElementById('report-file').files = files;
+                document.getElementById('file-name').textContent = files[0] ? `✓ Selected: ${files[0].name}` : '';
+            }
+
+            // Logout handler
+            document.getElementById('logout-btn').addEventListener('click', () => {
+                sessionStorage.clear();
+                localStorage.removeItem('remember_email');
+                window.location.href = 'login.html';
+            });
+        }
+
+        function handleUpload(e) {
+            e.preventDefault();
+
+            const reportType = document.getElementById('report-type')?.value;
+            const reportName = document.getElementById('report-name')?.value;
+            const reportFile = document.getElementById('report-file')?.files[0];
+            const messageDiv = document.getElementById('upload-message');
+            const uploadBtn = document.getElementById('upload-btn');
+
+            if (!reportType || !reportName || !reportFile) {
+                if (messageDiv) {
+                    messageDiv.className = 'form-message error';
+                    messageDiv.textContent = '❌ Please fill all fields and select a file';
+                    messageDiv.style.display = 'block';
+                }
+                return;
+            }
+
+            // Check file size (10 MB limit)
+            if (reportFile.size > 10 * 1024 * 1024) {
+                if (messageDiv) {
+                    messageDiv.className = 'form-message error';
+                    messageDiv.textContent = '❌ File size must be less than 10 MB';
+                    messageDiv.style.display = 'block';
+                }
+                return;
+            }
+
+            // Show loading
+            if (uploadBtn) {
+                uploadBtn.disabled = true;
+                uploadBtn.textContent = '⏳ Uploading...';
+            }
+
+            // Convert file to base64
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const fileData = event.target.result;
+
+                const uploadData = {
+                    user_id: currentUser.id,
+                    user_name: currentUser.name,
+                    email: currentUser.email,
+                    report_type: reportType,
+                    report_name: reportName,
+                    original_filename: reportFile.name,  // Include original filename to preserve extension
+                    report_data: fileData
+                };
+
+                // Send to backend
+                fetch('http://localhost:5000/upload-report', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(uploadData)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        if (messageDiv) {
+                            messageDiv.className = 'form-message success';
+                            messageDiv.textContent = '✓ Report uploaded successfully!';
+                            messageDiv.style.display = 'block';
+                        }
+
+                        // Reset form
+                        const uploadForm = document.getElementById('upload-form');
+                        const fileName = document.getElementById('file-name');
+                        if (uploadForm) uploadForm.reset();
+                        if (fileName) fileName.textContent = '';
+
+                        // Reload reports
+                        setTimeout(() => {
+                            loadPatientReports();
+                        }, 1000);
+                    } else {
+                        throw new Error(data.error || 'Upload failed');
+                    }
+
+                    if (uploadBtn) {
+                        uploadBtn.disabled = false;
+                        uploadBtn.textContent = '📤 Upload Report';
+                    }
+                })
+                .catch(err => {
+                    if (messageDiv) {
+                        messageDiv.className = 'form-message error';
+                        messageDiv.textContent = `❌ ${err.message}`;
+                        messageDiv.style.display = 'block';
+                    }
+                    if (uploadBtn) {
+                        uploadBtn.disabled = false;
+                        uploadBtn.textContent = '📤 Upload Report';
+                    }
+                });
+            };
+
+            reader.readAsDataURL(reportFile);
+        }
+
+        function loadPatientReports() {
+            const loadingDiv = document.getElementById('reports-loading');
+            const displayDiv = document.getElementById('reports-display');
+
+            if (loadingDiv) loadingDiv.style.display = 'block';
+
+            fetch(`http://localhost:5000/patient-reports?user_id=${currentUser.id}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (loadingDiv) loadingDiv.style.display = 'none';
+
+                    if (data.success) {
+                        allReports = data.reports;
+                        displayReports(data.reports);
+                    } else if (displayDiv) {
+                        displayDiv.innerHTML = '<p class="empty-state">Error loading reports</p>';
+                    }
+                })
+                .catch(err => {
+                    if (loadingDiv) loadingDiv.style.display = 'none';
+                    if (displayDiv) displayDiv.innerHTML = '<p class="empty-state">❌ Error loading reports</p>';
+                    console.error(err);
+                });
+        }
+
+        function displayReports(reports) {
+            const displayDiv = document.getElementById('reports-display');
+            
+            if (!displayDiv) return; // Element doesn't exist on this page
+
+            if (reports.length === 0) {
+                displayDiv.innerHTML = '<p class="empty-state">📂 No reports uploaded yet. Upload your first report above!</p>';
+                return;
+            }
+
+            displayDiv.innerHTML = reports.map(report => `
+                <div class="report-item" onclick="openReportModal(${report.id})">
+                    <div class="report-icon">
+                        ${getReportIcon(report.report_type)}
+                    </div>
+                    
+                    <div class="report-info">
+                        <h4>${report.report_name}</h4>
+                        <p class="report-type">${report.report_type}</p>
+                        <p class="report-date">📅 ${new Date(report.uploaded_at).toLocaleDateString()}</p>
+                        <p class="report-size">📊 ${formatFileSize(report.file_size)}</p>
+                    </div>
+
+                    <div class="report-actions">
+                        <button class="btn-small" onclick="event.stopPropagation(); downloadReportDirect(${report.id})">
+                            ⬇️ Download
+                        </button>
+                        <button class="btn-small" onclick="event.stopPropagation(); deleteReportDirect(${report.id})">
+                            🗑️ Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getReportIcon(reportType) {
+            const icons = {
+                'Blood Report': '🩸',
+                'X-Ray': '📸',
+                'ECG': '❤️',
+                'Ultrasound': '🔊',
+                'CT Scan': '🧠',
+                'MRI': '🔎',
+                'Thyroid Test': '🦴',
+                'Liver Function': '🏥',
+                'Kidney Function': '🏥',
+                'Diabetes Report': '🩹',
+                'Pathology Report': '🔬',
+                'Progress Report': '📊',
+                'Prescription': '💊',
+                'Other': '📄'
+            };
+            return icons[reportType] || '📄';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        function openReportModal(reportId) {
+            selectedReport = allReports.find(r => r.id === reportId);
+
+            if (!selectedReport) return;
+
+            const titleEl = document.getElementById('modal-report-title');
+            const typeEl = document.getElementById('modal-report-type');
+            const typeDisplayEl = document.getElementById('modal-type-display');
+            const dateEl = document.getElementById('modal-upload-date');
+            const sizeEl = document.getElementById('modal-file-size');
+            const statusEl = document.getElementById('modal-status');
+            const modalEl = document.getElementById('report-modal');
+
+            if (titleEl) titleEl.textContent = selectedReport.report_name;
+            if (typeEl) typeEl.textContent = selectedReport.report_type;
+            if (typeDisplayEl) typeDisplayEl.textContent = selectedReport.report_type;
+            if (dateEl) dateEl.textContent = new Date(selectedReport.uploaded_at).toLocaleString();
+            if (sizeEl) sizeEl.textContent = formatFileSize(selectedReport.file_size);
+            if (statusEl) {
+                statusEl.textContent = selectedReport.status;
+                statusEl.className = 'status-badge ' + selectedReport.status;
+            }
+
+            if (modalEl) modalEl.style.display = 'block';
+        }
+
+        function closeReportModal() {
+            const modalEl = document.getElementById('report-modal');
+            if (modalEl) modalEl.style.display = 'none';
+        }
+
+        // ============================================
+        // ANALYZE REPORT FUNCTIONALITY
+        // ============================================
+
+        function analyzeReport() {
+            console.log('[ANALYZE] Starting analysis for report:', selectedReport);
+            if (!selectedReport) {
+                console.error('[ANALYZE] No report selected');
+                return;
+            }
+
+            const analysisModal = document.getElementById('analysis-modal');
+            const loadingDiv = document.getElementById('analysis-loading');
+            const contentDiv = document.getElementById('analysis-content');
+            const errorDiv = document.getElementById('analysis-error');
+
+            console.log('[ANALYZE] Found elements:', {
+                analysisModal: !!analysisModal,
+                loadingDiv: !!loadingDiv,
+                contentDiv: !!contentDiv,
+                errorDiv: !!errorDiv
+            });
+
+            // Verify elements exist before accessing style
+            if (!analysisModal || !loadingDiv || !contentDiv || !errorDiv) {
+                console.error('[ANALYZE] Missing required modal elements');
+                alert('Error: Analysis interface not loaded properly. Please refresh the page.');
+                return;
+            }
+
+            // Show modal and loading state
+            try {
+                analysisModal.style.display = 'block';
+                loadingDiv.style.display = 'block';
+                contentDiv.style.display = 'none';
+                errorDiv.style.display = 'none';
+                console.log('[ANALYZE] Modal displayed successfully');
+            } catch (e) {
+                console.error('[ANALYZE] Error setting modal display:', e);
+                return;
+            }
+
+            // Call backend to analyze the report
+            console.log('[ANALYZE] Sending request to backend...');
+            fetch('http://localhost:5000/analyze-report', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    report_id: selectedReport.id
+                })
+            })
+            .then(res => {
+                console.log('[ANALYZE] Response received, parsing JSON...');
+                return res.json();
+            })
+            .then(data => {
+                console.log('[ANALYZE] Data parsed:', data);
+                if (loadingDiv) loadingDiv.style.display = 'none';
+
+                if (data && data.success === true) {
+                    console.log('[ANALYZE] Success! Displaying results...');
+                    displayAnalysisResults(data);
+                    if (contentDiv) contentDiv.style.display = 'block';
+                } else {
+                    const errorMsg = data?.error || data?.message || 'Failed to analyze report';
+                    console.log('[ANALYZE] Error from backend:', errorMsg);
+                    showAnalysisError(errorMsg);
+                }
+            })
+            .catch(err => {
+                console.error('[ANALYZE] Fetch error:', err);
+                if (loadingDiv) loadingDiv.style.display = 'none';
+                showAnalysisError('Network error: ' + (err.message || 'Unknown error'));
+            });
+        }
+
+        function showAnalysisError(errorMsg) {
+            const errorDiv = document.getElementById('analysis-error');
+            if (!errorDiv) {
+                console.error('Error div not found:', errorMsg);
+                alert('Error: ' + errorMsg);
+                return;
+            }
+            errorDiv.textContent = `❌ ${errorMsg}`;
+            errorDiv.style.display = 'block';
+        }
+
+        function displayAnalysisResults(data) {
+            try {
+                console.log('[DISPLAY] Starting to display results...');
+                // Patient Information
+                const nameEl = document.getElementById('analysis-patient-name');
+                const ageEl = document.getElementById('analysis-patient-age');
+                if (nameEl) nameEl.textContent = data.patient_name || 'Not specified';
+                if (ageEl) ageEl.textContent = data.age ? `${data.age} years` : 'Not specified';
+                console.log('[DISPLAY] Patient info set');
+
+                // Risk Level Indicator
+                if (data.risk_level) {
+                    console.log('[DISPLAY] Displaying risk level:', data.risk_level);
+                    displayRiskLevel(data.risk_level);
+                }
+
+                // Key Health Metrics
+                console.log('[DISPLAY] Displaying health metrics...');
+                if (data.blood_pressure !== undefined) displayMetric('blood_pressure', data.blood_pressure, 'Blood Pressure');
+                if (data.blood_sugar !== undefined) displayMetric('blood_sugar', data.blood_sugar, 'Blood Sugar', 'mg/dL');
+                if (data.hemoglobin !== undefined) displayMetric('hemoglobin', data.hemoglobin, 'Hemoglobin', 'g/dL');
+                if (data.cholesterol !== undefined) displayMetric('cholesterol', data.cholesterol, 'Cholesterol', 'mg/dL');
+
+                // Additional Values
+                if (data.other_values) {
+                    console.log('[DISPLAY] Displaying additional values...');
+                    displayAdditionalValues(data.other_values);
+                }
+
+                // Abnormalities
+                console.log('[DISPLAY] Handling abnormalities...');
+                if (data.abnormalities && data.abnormalities.length > 0) {
+                    displayAbnormalities(data.abnormalities);
+                } else {
+                    const abnormSection = document.getElementById('abnormalities-section');
+                    if (abnormSection) abnormSection.style.display = 'none';
+                }
+
+                // Conditions
+                const conditionsEl = document.getElementById('analysis-conditions');
+                if (conditionsEl) conditionsEl.textContent = data.diseases_conditions || 'Not specified';
+
+                // Summary
+                const summaryEl = document.getElementById('analysis-summary');
+                if (summaryEl) summaryEl.textContent = data.summary || 'No summary available';
+
+                // Recommendations
+                console.log('[DISPLAY] Displaying recommendations...');
+                displayRecommendations(data.risk_level, data.abnormalities, data.critical_keywords);
+
+                // Critical Alerts
+                console.log('[DISPLAY] Handling critical alerts...');
+                const alertsSection = document.getElementById('critical-alerts-section');
+                if (data.critical_keywords && data.critical_keywords.length > 0) {
+                    displayCriticalAlerts(data.critical_keywords);
+                } else if (data.abnormalities && data.abnormalities.some(a => a.severity === 'critical')) {
+                    if (alertsSection) alertsSection.style.display = 'block';
+                } else {
+                    if (alertsSection) alertsSection.style.display = 'none';
+                }
+                
+                console.log('[DISPLAY] All results displayed successfully');
+            } catch (error) {
+                console.error('[DISPLAY] Error displaying analysis results:', error);
+                showAnalysisError('Error displaying results: ' + error.message);
+            }
+        }
+
+        function displayRiskLevel(riskLevel) {
+            const riskBox = document.getElementById('risk-level-indicator');
+            const riskTitle = document.getElementById('risk-title');
+            const riskDesc = document.getElementById('risk-description');
+
+            // Check if all elements exist
+            if (!riskBox || !riskTitle || !riskDesc) {
+                console.error('Risk level display elements not found');
+                return;
+            }
+
+            riskBox.className = 'risk-level-box';
+
+            if (riskLevel === 'Critical') {
+                riskBox.classList.add('risk-critical');
+                riskTitle.textContent = '⚠️ CRITICAL RISK';
+                riskDesc.textContent = 'Critical abnormalities detected. Please consult a medical professional immediately.';
+            } else if (riskLevel === 'Warning') {
+                riskBox.classList.add('risk-warning');
+                riskTitle.textContent = '⚠️ WARNING';
+                riskDesc.textContent = 'Some abnormal values detected. Consult your doctor for guidance.';
+            } else {
+                riskBox.classList.add('risk-normal');
+                riskTitle.textContent = '✓ NORMAL';
+                riskDesc.textContent = 'Your health metrics appear to be within normal ranges. Keep up good health habits!';
+            }
+        }
+
+        function displayMetric(metricId, value, label, unit = '') {
+            try {
+                const metricCard = document.getElementById(`metric-${metricId}`);
+                const valElement = document.getElementById(`val-${metricId}`);
+                
+                // Check if elements exist
+                if (!metricCard || !valElement) return;
+
+                if (!value && value !== 0) {
+                    metricCard.style.opacity = '0.5';
+                    valElement.textContent = 'Not detected';
+                    return;
+                }
+
+                metricCard.style.opacity = '1';
+
+                const displayValue = unit ? `${value} ${unit}` : value;
+                valElement.textContent = displayValue;
+
+                // Add status indicator based on value
+                updateMetricStatus(metricId, value);
+            } catch (error) {
+                console.error(`Error displaying metric ${metricId}:`, error);
+            }
+        }
+
+        function updateMetricStatus(metricId, value) {
+            const metricCard = document.getElementById(`metric-${metricId}`);
+            if (!metricCard) return; // Element doesn't exist on this page
+            
+            metricCard.className = 'metric-card'; // Reset classes
+
+            // Determine status based on value ranges
+            let status = 'normal';
+
+            if (metricId === 'blood_pressure') {
+                try {
+                    const parts = String(value).split('/');
+                    const systolic = parseFloat(parts[0]);
+                    const diastolic = parseFloat(parts[1]);
+                    if (systolic > 140 || diastolic > 90) {
+                        status = 'warning';
+                    } else if (systolic < 90 || diastolic < 60) {
+                        status = 'warning';
+                    }
+                } catch (e) {}
+            } else if (metricId === 'blood_sugar') {
+                const bs = parseFloat(value);
+                if (bs > 180) status = 'warning';
+                else if (bs < 70) status = 'critical';
+            } else if (metricId === 'hemoglobin') {
+                const hb = parseFloat(value);
+                if (hb < 12) status = 'warning';
+            } else if (metricId === 'cholesterol') {
+                const chol = parseFloat(value);
+                if (chol > 240) status = 'warning';
+            }
+
+            if (status !== 'normal') {
+                metricCard.classList.add(`status-${status}`);
+            }
+        }
+
+        function displayAdditionalValues(otherValues) {
+            if (!otherValues) return;
+
+            const grid = document.getElementById('additional-values-grid');
+            if (!grid) return; // Element doesn't exist on this page
+            
+            let html = '';
+
+            const values = [
+                ['triglycerides', 'Triglycerides', '(mg/dL)'],
+                ['sodium', 'Sodium', '(mEq/L)'],
+                ['potassium', 'Potassium', '(mEq/L)'],
+                ['creatinine', 'Creatinine', '(mg/dL)'],
+                ['bilirubin', 'Bilirubin', '(mg/dL)'],
+                ['alt', 'ALT', '(IU/L)'],
+                ['ast', 'AST', '(IU/L)']
+            ];
+
+            values.forEach(([key, label, unit]) => {
+                const value = otherValues[key];
+                if (value && value !== null) {
+                    html += `
+                        <div class="value-item">
+                            <span class="value-label">${label}</span>
+                            <span class="value-display">${value} ${unit}</span>
+                        </div>
+                    `;
+                }
+            });
+
+            grid.innerHTML = html || '<p class="empty-state">No additional values detected</p>';
+        }
+
+        function displayAbnormalities(abnormalities) {
+            try {
+                const section = document.getElementById('abnormalities-section');
+                const list = document.getElementById('abnormalities-list');
+                
+                // Check if elements exist
+                if (!section || !list) {
+                    console.warn('Abnormalities display elements not found');
+                    return;
+                }
+
+                section.style.display = 'block';
+
+                let html = '';
+                abnormalities.forEach(ab => {
+                    const icon = ab.severity === 'critical' ? '🔴' : '⚠️';
+                    html += `
+                        <div class="abnormality-item severity-${ab.severity}">
+                            <div class="abnormality-header">
+                                <span class="abnormality-icon">${icon}</span>
+                                <span class="abnormality-param">${ab.parameter}</span>
+                                <span class="abnormality-status">${ab.status}</span>
+                            </div>
+                            <div class="abnormality-value">${ab.value}</div>
+                        </div>
+                    `;
+                });
+
+                list.innerHTML = html;
+            } catch (error) {
+                console.error('Error displaying abnormalities:', error);
+            }
+        }
+
+        function displayCriticalAlerts(keywords) {
+            try {
+                const section = document.getElementById('critical-alerts-section');
+                const list = document.getElementById('critical-alerts');
+                
+                // Check if elements exist
+                if (!section || !list) {
+                    console.warn('Critical alerts display elements not found');
+                    return;
+                }
+
+                section.style.display = 'block';
+
+                let html = '';
+                keywords.forEach(keyword => {
+                    html += `
+                        <div class="critical-alert-item">
+                            <span class="alert-icon">🚨</span>
+                            <span class="alert-text">${keyword}</span>
+                        </div>
+                    `;
+                });
+
+                list.innerHTML = html;
+            } catch (error) {
+                console.error('Error displaying critical alerts:', error);
+            }
+        }
+
+        function displayRecommendations(riskLevel, abnormalities, keywords) {
+            try {
+                const recBox = document.getElementById('recommendations-box');
+                let recommendations = [];
+
+                if (riskLevel === 'Critical') {
+                    recommendations.push('🏥 Seek immediate medical attention');
+                    recommendations.push('📞 Contact your healthcare provider as soon as possible');
+                    recommendations.push('🚑 If experiencing emergency symptoms, call emergency services');
+                } else if (riskLevel === 'Warning') {
+                    recommendations.push('👨‍⚕️ Schedule an appointment with your doctor');
+                    recommendations.push('📋 Bring this report to your doctor for review');
+                    recommendations.push('⏰ Monitor your health metrics regularly');
+                } else {
+                    recommendations.push('✅ Continue maintaining healthy lifestyles');
+                    recommendations.push('🏃 Stay active and exercise regularly');
+                    recommendations.push('🥗 Maintain a balanced diet');
+                    recommendations.push('💤 Get adequate sleep (7-9 hours)');
+                    recommendations.push('🚫 Avoid smoking and excessive alcohol');
+                }
+
+                // Add specific recommendations based on abnormalities
+                if (abnormalities && abnormalities.length > 0) {
+                    if (abnormalities.some(a => a.parameter === 'Blood Pressure' && a.status === 'High')) {
+                        recommendations.push('🧂 Reduce sodium intake');
+                        recommendations.push('⏱️ Manage stress through meditation or yoga');
+                    }
+                    if (abnormalities.some(a => a.parameter === 'Blood Sugar' && a.status === 'High')) {
+                        recommendations.push('🍬 Limit sugar intake');
+                        recommendations.push('🥕 Include more fiber-rich foods');
+                    }
+                    if (abnormalities.some(a => a.parameter === 'Total Cholesterol' && a.status === 'High')) {
+                        recommendations.push('🥡 Reduce saturated fats');
+                        recommendations.push('🐟 Include omega-3 rich foods');
+                    }
+                    if (abnormalities.some(a => a.parameter === 'Hemoglobin' && a.status.includes('Low'))) {
+                        recommendations.push('🥩 Increase iron-rich foods');
+                        recommendations.push('🍊 Include vitamin C sources for better iron absorption');
+                    }
+                }
+
+                let html = recommendations.map(rec => `<div class="recommendation-item">${rec}</div>`).join('');
+                if (recBox) {
+                    recBox.innerHTML = html;
+                }
+            } catch (error) {
+                console.error('Error displaying recommendations:', error);
+            }
+        }
+
+        function closeAnalysisModal() {
+            const modal = document.getElementById('analysis-modal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function downloadReport() {
+            if (selectedReport) {
+                downloadReportDirect(selectedReport.id);
+            }
+        }
+
+        function downloadReportDirect(reportId) {
+            const report = allReports.find(r => r.id === reportId);
+            if (!report) {
+                console.error('[DOWNLOAD] Report not found:', reportId);
+                alert('❌ Report not found');
+                return;
+            }
+            
+            console.log('[DOWNLOAD] Starting download for report ID:', reportId);
+            console.log('[DOWNLOAD] Report name:', report.report_name);
+            
+            const downloadBtn = event?.target;
+            if (downloadBtn) {
+                downloadBtn.disabled = true;
+                downloadBtn.textContent = '⏳ Downloading...';
+            }
+            
+            // Create fetch request for file download
+            fetch(`http://localhost:5000/download-report/${reportId}`)
+                .then(res => {
+                    console.log('[DOWNLOAD] Response status:', res.status);
+                    console.log('[DOWNLOAD] Response OK:', res.ok);
+                    
+                    if (!res.ok) {
+                        return res.json().then(data => {
+                            throw new Error(data.error || 'Failed to download report');
+                        }).catch(e => {
+                            throw new Error('Failed to download report');
+                        });
+                    }
+                    
+                    // Get filename from Content-Disposition header if available
+                    const contentDisposition = res.headers.get('content-disposition');
+                    let filename = report.report_name;
+                    
+                    if (contentDisposition) {
+                        const match = contentDisposition.match(/filename="?([^";]+)"?/i);
+                        if (match) filename = match[1];
+                    }
+                    
+                    console.log('[DOWNLOAD] Filename:', filename);
+                    
+                    return res.blob().then(blob => {
+                        console.log('[DOWNLOAD] Blob size:', blob.size);
+                        
+                        // Create blob URL and download
+                        const url = window.URL.createObjectURL(blob);
+                        const link = document.getElementById('download-link');
+                        if (link) {
+                            link.href = url;
+                            link.download = filename;
+                            link.click();
+                            window.URL.revokeObjectURL(url);
+                        }
+                        
+                        console.log('[DOWNLOAD] File downloaded successfully');
+                        return true;
+                    });
+                })
+                .then(success => {
+                    if (success) {
+                        alert(`✓ Report downloaded: ${report.report_name}`);
+                    }
+                })
+                .catch(error => {
+                    console.error('[DOWNLOAD] Fetch error:', error.message);
+                    alert(`❌ Error downloading report: ${error.message}`);
+                })
+                .finally(() => {
+                    if (downloadBtn) {
+                        downloadBtn.disabled = false;
+                        downloadBtn.textContent = '⬇️ Download';
+                    }
+                });
+        }
+
+        function shareReport() {
+            if (selectedReport) {
+                const shareText = `Check out my ${selectedReport.report_type}: ${selectedReport.report_name}`;
+                if (navigator.share) {
+                    navigator.share({
+                        title: selectedReport.report_name,
+                        text: shareText
+                    });
+                } else {
+                    alert('Sharing available on mobile browsers');
+                }
+            }
+        }
+
+        function deleteReport() {
+            if (selectedReport && confirm('Are you sure you want to delete this report?')) {
+                deleteReportDirect(selectedReport.id);
+            }
+        }
+
+        function deleteReportDirect(reportId) {
+            console.log('[DELETE] Deleting report ID:', reportId);
+            
+            const deleteBtn = document.getElementById('delete-btn');
+            if (deleteBtn) {
+                deleteBtn.disabled = true;
+                deleteBtn.textContent = '⏳ Deleting...';
+            }
+            
+            console.log('[DELETE] Sending DELETE request to: http://localhost:5000/delete-report/' + reportId);
+            
+            fetch(`http://localhost:5000/delete-report/${reportId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(res => {
+                console.log('[DELETE] Response status:', res.status);
+                console.log('[DELETE] Response OK:', res.ok);
+                
+                // Handle different response statuses
+                if (!res.ok && res.status !== 200) {
+                    console.warn('[DELETE] Response not OK, status:', res.status);
+                }
+                
+                return res.json().catch(e => {
+                    console.error('[DELETE] Failed to parse JSON response:', e);
+                    console.log('[DELETE] Response text might be:', res.text);
+                    return { success: false, error: 'Invalid server response' };
+                });
+            })
+            .then(data => {
+                console.log('[DELETE] Response data:', data);
+                
+                if (data && data.success) {
+                    console.log('[DELETE] Success! Report deleted.');
+                    alert('✓ Report deleted successfully');
+                    closeReportModal();
+                    loadPatientReports();
+                } else {
+                    const errorMsg = data?.error || data?.message || 'Unknown error';
+                    console.error('[DELETE] Error response:', data);
+                    alert('❌ Error deleting report: ' + errorMsg);
+                    
+                    if (deleteBtn) {
+                        deleteBtn.disabled = false;
+                        deleteBtn.textContent = '🗑️ Delete Report';
+                    }
+                }
+            })
+            .catch(err => {
+                console.error('[DELETE] Fetch error:', err);
+                console.error('[DELETE] Error name:', err.name);
+                console.error('[DELETE] Error message:', err.message);
+                alert('❌ Error deleting report: ' + (err.message || 'Network error'));
+                
+                if (deleteBtn) {
+                    deleteBtn.disabled = false;
+                    deleteBtn.textContent = '🗑️ Delete Report';
+                }
+            });
+        }
+
+        function filterReports() {
+            const selectedType = document.getElementById('report-filter').value;
+
+            if (!selectedType) {
+                displayReports(allReports);
+                return;
+            }
+
+            const filtered = allReports.filter(r => r.report_type === selectedType);
+            displayReports(filtered);
+        }
+
+        function refreshReports() {
+            loadPatientReports();
+            alert('✓ Reports refreshed');
+        }
+
+        // Close modal when clicking outside
+        window.onclick = (event) => {
+            const reportModal = document.getElementById('report-modal');
+            const analysisModal = document.getElementById('analysis-modal');
+
+            if (reportModal && event.target === reportModal) {
+                reportModal.style.display = 'none';
+            }
+            if (analysisModal && event.target === analysisModal) {
+                analysisModal.style.display = 'none';
+            }
+        };
+
+        // Auto-load reports on page load
+        setTimeout(() => {
+            loadPatientReports();
+        }, 500);
+    </script>
+</body>
+</html>

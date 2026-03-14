@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health AI - Symptom Checker</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Authentication check -->
+    <script>
+        // Redirect to login if not authenticated
+        if (!sessionStorage.getItem('user')) {
+            window.location.href = 'login.html';
+        }
+    </script>
+</head>
+<body>
+    <main class="page" aria-labelledby="app-title">
+        <nav class="top-nav" aria-label="Main navigation">
+            <button id="tab-symptom" class="nav-tab active" type="button">Symptom Checker</button>
+            <button id="tab-chat" class="nav-tab" type="button">Health Assistant</button>
+            <button id="settings-btn" class="nav-tab settings-nav-btn" type="button" aria-label="Open Settings">⚙ Settings</button>
+            <button onclick="window.location.href='dashboard.html'" class="nav-tab" type="button" style="background: #667eea; color: white; margin-left: auto;">← Dashboard</button>
+        </nav>
+
+        <section id="symptom-view">
+        <header class="hero">
+            <div class="chat-status" id="chat-status">
+                <span class="status-dot"></span>
+                <span class="status-text">Checking...</span>
+            </div>
+            <p class="hero-tag">AI Assisted Primary Screening</p>
+            <h1 id="app-title">Health AI - Symptom Checker</h1>
+            <p class="hero-subtitle">Choose one or more symptoms to get a quick disease prediction and guidance.</p>
+        </header>
+
+        <section class="panel" aria-label="Symptom input">
+            <form id="symptom-form" class="symptom-form">
+                <label for="symptom-text" class="field-label">Describe your symptoms</label>
+                <div class="nlp-row">
+                    <input
+                        type="text"
+                        id="symptom-text"
+                        name="symptom-text"
+                        placeholder="I have fever and joint pain"
+                        autocomplete="off"
+                    >
+                    <button id="analyze-symptoms" type="button" class="secondary-button">Analyze Symptoms</button>
+                </div>
+                <p id="nlp-status" class="field-help" aria-live="polite"></p>
+
+                <label for="symptom-search" class="field-label">Search and Select Symptoms</label>
+                <p class="field-help">Detected symptoms (you can remove or add manually):</p>
+                <div class="search-select" aria-describedby="symptom-help">
+                    <div id="selected-symptoms" class="selected-tags" aria-label="Selected symptoms"></div>
+                    <input
+                        type="text"
+                        id="symptom-search"
+                        name="symptom-search"
+                        placeholder="Type symptoms (example: headache, fever, cough)"
+                        autocomplete="off"
+                    >
+                    <ul id="symptom-suggestions" class="suggestions" role="listbox" aria-label="Symptom suggestions"></ul>
+                </div>
+                <p id="symptom-help" class="field-help">Type at least 1-2 letters, then click a suggestion to add it. Click x on a tag to remove.</p>
+                <button type="submit">Predict Disease</button>
+            </form>
+        </section>
+
+        <section id="results" class="results" aria-live="polite" aria-label="Prediction results">
+            <article class="result-box">
+                <h2>🦠 Possible Disease</h2>
+                <p>Prediction will appear here after submission.</p>
+            </article>
+            <article class="result-box">
+                <h2>📊 Confidence Score</h2>
+                <p>Confidence will appear here.</p>
+            </article>
+            <article class="result-box">
+                <h2>📊 Risk Level</h2>
+                <p>Risk level will appear here.</p>
+            </article>
+            <article class="result-box medlineplus-section">
+                <h3>📚 MedlinePlus </h3>
+                <p>MedlinePlus summary will appear here.</p>
+             </article>
+            <article class="result-box">
+                <h2>💊 Medicine Advice</h2>
+                <p>Medicine guidance will appear here.</p>
+            </article>
+            <article class="result-box">
+                <h2>🌿 Ayurvedic Remedy</h2>
+                <p>Ayurvedic suggestions will appear here.</p>
+            </article>
+            <article class="result-box">
+                <h2>🥗 Diet Advice</h2>
+                <p>Diet guidance will appear here.</p>
+            </article>
+            <article class="result-box">
+                <h2>🌿 Herbs</h2>
+                <p>Herbal suggestions will appear here.</p>
+            </article>
+            <article class="result-box">
+                <h2>⚠ Precautions</h2>
+                <p>Precaution details will appear here.</p>
+            </article>
+        </section>
+
+        <section id="emergency-box" class="emergency-box hidden" aria-live="assertive"></section>
+
+        <p class="disclaimer">
+            This AI tool provides health suggestions and should not replace professional medical advice. Always consult a qualified doctor.
+        </p>
+        </section>
+
+        <section id="chat-view" class="chat-page hidden" aria-label="Health Assistant Chat">
+            <article class="chat-card">
+                <header class="chat-header">AI Health Assistant</header>
+                <div id="chat-history" class="chat-history" aria-live="polite"></div>
+                <p class="chat-disclaimer">
+                    This AI assistant provides general health information and is not a substitute for professional medical advice.
+                </p>
+                <div class="chat-input-row">
+                    <input id="chat-input" type="text" placeholder="Ask a general health question..." autocomplete="off">
+                    <button id="chat-send" type="button">Send</button>
+                </div>
+            </article>
+        </section>
+
+        <button id="chat-fab" class="chat-fab" type="button" aria-label="Open Health Assistant" aria-expanded="false">💬</button>
+
+        <div id="settings-sidebar" class="settings-sidebar" aria-label="Settings Panel">
+            <div class="settings-header">
+                <h2>Settings</h2>
+                <button id="settings-close" class="settings-close" type="button" aria-label="Close Settings">✕</button>
+            </div>
+            <div class="settings-content">
+                <section class="settings-section">
+                    <h3>Appearance</h3>
+                    <label class="settings-toggle">
+                        <input id="dark-mode-toggle" type="checkbox" aria-label="Toggle Dark Mode">
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-label">Dark Mode</span>
+                    </label>
+                </section>
+                <section class="settings-section">
+                    <h3>Accessibility</h3>
+                    <label class="settings-toggle">
+                        <input id="color-blind-toggle" type="checkbox" aria-label="Toggle Color Blind Mode">
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-label">Color Blind Mode</span>
+                    </label>
+                </section>
+            </div>
+        </div>
+        <div id="settings-overlay" class="settings-overlay"></div>
+
+        <section id="chat-float" class="chat-float hidden" aria-label="Floating Health Assistant">
+            <header class="chat-header">AI Health Assistant</header>
+            <div id="chat-history-float" class="chat-history" aria-live="polite"></div>
+            <p class="chat-disclaimer">
+                This AI assistant provides general health information and is not a substitute for professional medical advice.
+            </p>
+            <div class="chat-input-row">
+                <input id="chat-input-float" type="text" placeholder="Ask a question..." autocomplete="off">
+                <button id="chat-send-float" type="button">Send</button>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

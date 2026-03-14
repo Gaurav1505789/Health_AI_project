@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health AI - Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="auth-box">
+            <!-- Header Section -->
+            <header class="auth-header">
+                <h1>Health AI</h1>
+                <p class="tag-line">Emergency Health Care System</p>
+            </header>
+
+            <!-- Login Form -->
+            <form id="login-form" class="auth-form">
+                <h2>Welcome Back</h2>
+                <p class="form-subtitle">Sign in to your account</p>
+
+                <!-- Email Field -->
+                <div class="form-group">
+                    <label for="login-email">Email Address</label>
+                    <input 
+                        type="email" 
+                        id="login-email" 
+                        name="email" 
+                        placeholder="your.email@example.com"
+                        required
+                    >
+                </div>
+
+                <!-- Password Field -->
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input 
+                        type="password" 
+                        id="login-password" 
+                        name="password" 
+                        placeholder="Enter your password"
+                        required
+                    >
+                </div>
+
+                <!-- Remember Me Checkbox -->
+                <div class="form-group checkbox">
+                    <input type="checkbox" id="remember-me" name="remember">
+                    <label for="remember-me">Remember me</label>
+                </div>
+
+                <!-- Login Status Message -->
+                <div id="login-message" class="form-message" style="display: none;"></div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn-primary" id="login-btn">Sign In</button>
+
+                <!-- Signup Link -->
+                <p class="auth-link">
+                    Don't have an account? <a href="signup.html">Create one here</a>
+                </p>
+            </form>
+        </div>
+
+        <!-- Illustration/Info Section -->
+        <div class="auth-info">
+            <div class="info-content">
+                <h3>Quick Access Features</h3>
+                <ul class="benefits-list">
+                    <li>✓ Fast symptom checker</li>
+                    <li>✓ One-click emergency SOS</li>
+                    <li>✓ View health history</li>
+                    <li>✓ Track emergency alerts</li>
+                    <li>✓ Instant doctor access</li>
+                    <li>✓ Find nearby hospitals</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+    <script>
+        // Auto-fill email if coming from signup
+        window.addEventListener('load', () => {
+            const signupEmail = localStorage.getItem('signup_email');
+            if (signupEmail) {
+                document.getElementById('login-email').value = signupEmail;
+                localStorage.removeItem('signup_email'); // Clear after use
+            }
+        });
+
+        // Handle login form submission
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const rememberMe = document.getElementById('remember-me').checked;
+            
+            const messageDiv = document.getElementById('login-message');
+            const loginBtn = document.getElementById('login-btn');
+            
+            try {
+                // Disable button during request
+                loginBtn.disabled = true;
+                loginBtn.textContent = 'Signing in...';
+                
+                const response = await fetch('http://localhost:5000/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Store user session
+                    sessionStorage.setItem('user', JSON.stringify(data.user));
+                    sessionStorage.setItem('token', data.token);
+                    
+                    if (rememberMe) {
+                        localStorage.setItem('remember_email', email);
+                    }
+                    
+                    messageDiv.className = 'form-message success';
+                    messageDiv.textContent = '✓ Login successful! Redirecting...';
+                    messageDiv.style.display = 'block';
+                    
+                    // Redirect to dashboard after 1 second
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1000);
+                } else {
+                    messageDiv.className = 'form-message error';
+                    messageDiv.textContent = '✗ ' + (data.error || 'Login failed');
+                    messageDiv.style.display = 'block';
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'Sign In';
+                }
+            } catch (error) {
+                messageDiv.className = 'form-message error';
+                messageDiv.textContent = '✗ Network error. Please try again.';
+                messageDiv.style.display = 'block';
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Sign In';
+                console.error('Login error:', error);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health AI - Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="dashboard-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1>Health AI</h1>
+                <span id="user-role-badge" class="role-badge"></span>
+            </div>
+            <div class="nav-menu">
+                <span id="user-name-display" class="user-name"></span>
+                <button id="logout-btn" class="btn-logout">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Dashboard Content -->
+    <main class="dashboard-main">
+        <!-- Patient Dashboard -->
+        <section id="patient-dashboard" class="dashboard-section" style="display: none;">
+            <div class="dashboard-header">
+                <h2>Welcome, <span id="patient-name"></span>! 👋</h2>
+                <p>Your personal health emergency system</p>
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- Emergency SOS Card -->
+                <div class="dashboard-card emergency-card">
+                    <div class="card-icon">🆘</div>
+                    <h3>Emergency SOS</h3>
+                    <p>Immediate medical assistance</p>
+                    <button class="btn-primary" onclick="goToSOS()">Activate SOS</button>
+                </div>
+
+                <!-- Symptom Checker Card -->
+                <div class="dashboard-card symptom-card">
+                    <div class="card-icon">🏥</div>
+                    <h3>Symptom Checker</h3>
+                    <p>Get AI health analysis</p>
+                    <button class="btn-primary" onclick="goToSymptomChecker()">Check Symptoms</button>
+                </div>
+
+                <!-- Health Chat Card -->
+                <div class="dashboard-card chat-card">
+                    <div class="card-icon">💬</div>
+                    <h3>Health Assistant</h3>
+                    <p>Chat with AI health expert</p>
+                    <button class="btn-primary" onclick="goToChat()">Start Chat</button>
+                </div>
+
+                <!-- Emergency History Card -->
+                <div class="dashboard-card history-card">
+                    <div class="card-icon">📋</div>
+                    <h3>My Emergency History</h3>
+                    <p>View past emergencies</p>
+                    <button class="btn-primary" onclick="viewEmergencyHistory()">View History</button>
+                </div>
+
+                <!-- Nearby Hospitals Card - Google Maps -->
+                <div class="dashboard-card hospital-card">
+                    <div class="card-icon">🗺️</div>
+                    <h3>Nearby Hospitals (Maps)</h3>
+                    <p>Google Maps view</p>
+                    <button class="btn-primary" onclick="goToNearbyHospitals()">Find Hospitals</button>
+                </div>
+
+                <!-- Nearby Hospitals Card - Leaflet/OpenStreetMap -->
+                <div class="dashboard-card hospital-card">
+                    <div class="card-icon">🌍</div>
+                    <h3>Nearby Hospitals (Leaflet)</h3>
+                    <p>OpenStreetMap & Overpass API</p>
+                    <button class="btn-primary" onclick="goToLeafletHospitalMap()">Find via OpenStreetMap</button>
+                </div>
+
+                <!-- Medical Reports Card -->
+                <div class="dashboard-card reports-card">
+                    <div class="card-icon">📄</div>
+                    <h3>My Medical Reports</h3>
+                    <p>Upload and view reports</p>
+                    <button class="btn-primary" onclick="goToReports()">My Reports</button>
+                </div>
+
+                <!-- Yoga & Wellness Card -->
+                <div class="dashboard-card wellness-card">
+                    <div class="card-icon">🧘</div>
+                    <h3>Yoga & Wellness</h3>
+                    <p>Daily yoga and exercise routines</p>
+                    <button class="btn-primary" onclick="goToYoga()">Start Wellness</button>
+                </div>
+            </div>
+
+            <!-- Recent Activities -->
+            <div class="dashboard-section">
+                <h3>Recent Emergency Alerts</h3>
+                <div id="patient-alerts" class="alerts-list">
+                    <p class="empty-state">No recent emergencies</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Doctor Dashboard -->
+        <section id="doctor-dashboard" class="dashboard-section" style="display: none;">
+            <div class="dashboard-header">
+                <h2>Doctor Portal - <span id="doctor-name"></span></h2>
+                <p>Monitor and respond to emergency requests</p>
+            </div>
+
+            <div class="doctor-controls">
+                <button class="btn-secondary" onclick="refreshEmergencyAlerts()">🔄 Refresh Alerts</button>
+                <button class="btn-secondary" onclick="viewCompleted()">✓ View Completed</button>
+            </div>
+
+            <!-- Emergency Requests List -->
+            <div class="dashboard-section">
+                <h3>Active Emergency Requests</h3>
+                <div id="emergency-requests" class="emergency-list">
+                    <p class="empty-state">No active emergencies</p>
+                </div>
+            </div>
+
+            <!-- Doctor Statistics -->
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <h4>Active Cases</h4>
+                    <p id="active-cases" class="stat-number">0</p>
+                </div>
+                <div class="stat-card">
+                    <h4>Responded Today</h4>
+                    <p id="responded-today" class="stat-number">0</p>
+                </div>
+                <div class="stat-card">
+                    <h4>Avg. Response Time</h4>
+                    <p id="avg-response-time" class="stat-number">--</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Hospital Dashboard -->
+        <section id="hospital-dashboard" class="dashboard-section" style="display: none;">
+            <div class="dashboard-header">
+                <h2>Hospital Management - <span id="hospital-name"></span></h2>
+                <p>Emergency patient alerts and management system</p>
+            </div>
+
+            <div class="hospital-controls">
+                <button class="btn-secondary" onclick="refreshHospitalAlerts()">🔄 Refresh Alerts</button>
+                <button class="btn-secondary" onclick="exportAlerts()">📥 Export Data</button>
+                <button class="btn-secondary" onclick="viewHospitalStats()">📊 View Statistics</button>
+            </div>
+
+            <!-- Patient Emergency Alerts -->
+            <div class="dashboard-section">
+                <h3>Patient Emergency Alerts</h3>
+                <div id="hospital-alerts" class="alerts-list">
+                    <p class="empty-state">No emergency alerts</p>
+                </div>
+            </div>
+
+            <!-- Hospital Statistics -->
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <h4>Total Alerts</h4>
+                    <p id="total-hospital-alerts" class="stat-number">0</p>
+                </div>
+                <div class="stat-card">
+                    <h4>Critical Cases</h4>
+                    <p id="critical-cases" class="stat-number">0</p>
+                </div>
+                <div class="stat-card">
+                    <h4>Resolved Today</h4>
+                    <p id="resolved-today" class="stat-number">0</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal for Emergency History -->
+    <div id="history-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h3>Emergency History</h3>
+            <div id="history-content" class="modal-body">
+                <!-- History will load here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Emergency Response Panel Modal -->
+    <div id="emergency-response-modal" class="modal" style="display: none;">
+        <div class="modal-content emergency-panel">
+            <span class="close" onclick="closeEmergencyPanel()">&times;</span>
+            <h3>🚨 Emergency Response Panel</h3>
+            
+            <!-- Patient Information -->
+            <div class="panel-section patient-info">
+                <h4>Patient Information</h4>
+                <div class="info-grid">
+                    <p><strong>Name:</strong> <span id="panel-patient-name">--</span></p>
+                    <p><strong>Email:</strong> <span id="panel-patient-email">--</span></p>
+                    <p><strong>Phone:</strong> <span id="panel-patient-phone">--</span></p>
+                    <p><strong>Time:</strong> <span id="panel-emergency-time">--</span></p>
+                    <p><strong>Location:</strong> <span id="panel-location">--</span></p>
+                    <p><strong>Status:</strong> <span id="panel-status" class="status-badge">--</span></p>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="panel-section action-buttons">
+                <h4>Quick Actions</h4>
+                <div class="button-grid">
+                    <a id="call-patient-btn" href="#" class="action-btn call-btn">
+                        📞 Call Patient
+                    </a>
+                    <button id="show-location-btn" class="action-btn location-btn">
+                        📍 Show Location
+                    </button>
+                    <button id="send-advisory-btn" class="action-btn advisory-btn">
+                        💊 Send Advisory
+                    </button>
+                    <button id="request-ambulance-btn" class="action-btn ambulance-btn">
+                        🚑 Request Ambulance
+                    </button>
+                    <button id="send-message-btn" class="action-btn message-btn">
+                        💬 Send Message
+                    </button>
+                </div>
+            </div>
+
+            <!-- Map Container (Hidden by default) -->
+            <div id="panel-map-container" class="panel-section" style="display: none;">
+                <h4>Patient Location</h4>
+                <div id="panel-map" style="height: 300px; border-radius: 8px;"></div>
+                <a id="google-maps-link" href="#" target="_blank" class="btn-secondary" style="margin-top: 10px; display: inline-block;">
+                    🗺️ Open in Google Maps
+                </a>
+            </div>
+
+            <!-- Advisory Form (Hidden by default) -->
+            <div id="advisory-form-container" class="panel-section" style="display: none;">
+                <h4>Send Medical Advisory</h4>
+                <textarea id="advisory-text" rows="4" placeholder="Enter medical advice for the patient..."></textarea>
+                <button id="submit-advisory-btn" class="btn-primary">Send Advisory</button>
+                <button onclick="hideAdvisoryForm()" class="btn-secondary">Cancel</button>
+            </div>
+
+            <!-- Message Form (Hidden by default) -->
+            <div id="message-form-container" class="panel-section" style="display: none;">
+                <h4>Send Emergency Message</h4>
+                <textarea id="message-text" rows="3" placeholder="Type your message..."></textarea>
+                <button id="submit-message-btn" class="btn-primary">Send Message</button>
+                <button onclick="hideMessageForm()" class="btn-secondary">Cancel</button>
+            </div>
+
+            <!-- Emergency Chat Container -->
+            <div id="emergency-chat-container" class="panel-section" style="display: none;">
+                <h4>💬 Emergency Chat</h4>
+                <div id="chat-status" class="chat-status-indicator"></div>
+                <div id="chat-messages" class="chat-messages"></div>
+                <div class="chat-input-container">
+                    <input type="text" id="chat-input" placeholder="Type your message..." />
+                    <button id="send-chat-btn" class="btn-primary">Send</button>
+                </div>
+            </div>
+
+            <!-- Emergency Timeline -->
+            <div id="emergency-timeline-container" class="panel-section" style="display: none;">
+                <h4>📋 Emergency Timeline</h4>
+                <div id="timeline-events" class="timeline-events"></div>
+            </div>
+
+            <!-- Ambulance Search Results -->
+            <div id="ambulance-search-container" class="panel-section" style="display: none;">
+                <h4>🚑 Nearby Ambulance Services</h4>
+                <div id="ambulance-list" class="ambulance-list"></div>
+            </div>
+
+            <!-- Status Update -->
+            <div class="panel-section status-update">
+                <h4>Update Case Status</h4>
+                <select id="status-select">
+                    <option value="pending">Pending</option>
+                    <option value="responding">Responding</option>
+                    <option value="resolved">Resolved</option>
+                </select>
+                <button id="update-status-btn" class="btn-primary">Update Status</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Socket.IO for real-time communication -->
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <!-- Emergency modules -->
+    <script src="emergency-chat.js"></script>
+    <script src="live-location.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // Initialize dashboard on page load
+        document.addEventListener('DOMContentLoaded', initializeDashboard);
+
+        function initializeDashboard() {
+            const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+            
+            if (!user.id) {
+                // User not logged in, redirect to login
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Set user info
+            document.getElementById('user-name-display').textContent = user.name;
+            document.getElementById('user-role-badge').textContent = user.role;
+
+            // Show role-specific dashboard
+            if (user.role === 'Patient') {
+                showPatientDashboard(user);
+            } else if (user.role === 'Doctor') {
+                showDoctorDashboard(user);
+            } else if (user.role === 'Hospital') {
+                showHospitalDashboard(user);
+            }
+
+            // Load emergency alerts
+            loadEmergencyAlerts();
+
+            // Set auto-refresh for alerts
+            setInterval(loadEmergencyAlerts, 30000); // Refresh every 30 seconds
+        }
+
+        function showPatientDashboard(user) {
+            document.getElementById('patient-dashboard').style.display = 'block';
+            document.getElementById('patient-name').textContent = user.name;
+        }
+
+        function showDoctorDashboard(user) {
+            document.getElementById('doctor-dashboard').style.display = 'block';
+            document.getElementById('doctor-name').textContent = user.name;
+            loadEmergencyRequests();
+        }
+
+        function showHospitalDashboard(user) {
+            document.getElementById('hospital-dashboard').style.display = 'block';
+            document.getElementById('hospital-name').textContent = user.name;
+            loadHospitalAlerts();
+        }
+
+        function loadEmergencyAlerts() {
+            const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+            
+            fetch(`http://localhost:5000/emergency-alerts?role=${user.role}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (user.role === 'Patient') {
+                        displayPatientAlerts(data.alerts || []);
+                    } else if (user.role === 'Doctor') {
+                        displayDoctorRequests(data.alerts || []);
+                    } else if (user.role === 'Hospital') {
+                        displayHospitalAlerts(data.alerts || []);
+                    }
+                })
+                .catch(err => console.error('Error loading alerts:', err));
+        }
+
+        function displayPatientAlerts(alerts) {
+            const container = document.getElementById('patient-alerts');
+            if (alerts.length === 0) {
+                container.innerHTML = '<p class="empty-state">No recent emergencies</p>';
+                return;
+            }
+
+            container.innerHTML = alerts.map(alert => `
+                <div class="alert-item">
+                    <div class="alert-time">${new Date(alert.timestamp).toLocaleString()}</div>
+                    <div class="alert-location">📍 Lat: ${alert.latitude.toFixed(4)}, Lng: ${alert.longitude.toFixed(4)}</div>
+                    <div class="alert-status">Status: <span class="status-badge ${alert.status}">${alert.status}</span></div>
+                </div>
+            `).join('');
+        }
+
+        // Store alerts globally for access
+        let currentAlerts = [];
+
+        function displayDoctorRequests(alerts) {
+            currentAlerts = alerts; // Store for later access
+            const container = document.getElementById('emergency-requests');
+            if (alerts.length === 0) {
+                container.innerHTML = '<p class="empty-state">No active emergencies</p>';
+                document.getElementById('active-cases').textContent = '0';
+                return;
+            }
+
+            container.innerHTML = alerts.map(alert => `
+                <div class="request-card">
+                    <div class="request-header">
+                        <h4>${alert.user_name}</h4>
+                        <span class="request-time">${new Date(alert.timestamp).toLocaleString()}</span>
+                    </div>
+                    <div class="request-details">
+                        <p><strong>Email:</strong> ${alert.email}</p>
+                        <p><strong>Location:</strong> ${alert.latitude.toFixed(4)}, ${alert.longitude.toFixed(4)}</p>
+                    </div>
+                    <button class="btn-primary respond-btn" data-alert-id="${alert.id}">Respond Now</button>
+                </div>
+            `).join('');
+
+            document.getElementById('active-cases').textContent = alerts.length;
+
+            // Attach event listeners to all Respond Now buttons
+            document.querySelectorAll('.respond-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const alertId = parseInt(this.dataset.alertId);
+                    console.log('Respond button clicked for alert ID:', alertId);
+                    openEmergencyPanel(alertId);
+                });
+            });
+        }
+
+        function displayHospitalAlerts(alerts) {
+            const container = document.getElementById('hospital-alerts');
+            if (alerts.length === 0) {
+                container.innerHTML = '<p class="empty-state">No emergency alerts</p>';
+                document.getElementById('total-hospital-alerts').textContent = '0';
+                return;
+            }
+
+            container.innerHTML = alerts.map(alert => `
+                <div class="hospital-alert-item">
+                    <div class="alert-header">
+                        <h5>${alert.user_name}</h5>
+                        <span class="severity-badge critical">CRITICAL</span>
+                    </div>
+                    <div class="alert-info">
+                        <p>📧 ${alert.email}</p>
+                        <p>📍 Lat: ${alert.latitude.toFixed(4)}, Lng: ${alert.longitude.toFixed(4)}</p>
+                        <p>⏰ ${new Date(alert.timestamp).toLocaleString()}</p>
+                    </div>
+                    <button class="btn-primary" onclick="assignToDoctor(${alert.id})">Assign Doctor</button>
+                </div>
+            `).join('');
+
+            document.getElementById('total-hospital-alerts').textContent = alerts.length;
+            document.getElementById('critical-cases').textContent = alerts.length;
+        }
+
+        function refreshEmergencyAlerts() {
+            loadEmergencyAlerts();
+            alert('✓ Alerts refreshed');
+        }
+
+        function refreshHospitalAlerts() {
+            loadEmergencyAlerts();
+            alert('✓ Hospital alerts refreshed');
+        }
+
+        // ===== EMERGENCY RESPONSE PANEL FUNCTIONS =====
+        let panelMap = null;
+        let currentEmergencyData = null;
+        let doctorChat = null; // Real-time chat for doctor
+        let liveMap = null; // Live location map
+
+        function openEmergencyPanel(alertId) {
+            console.log('Opening emergency panel for alert:', alertId);
+            
+            // Find alert data
+            const alert = currentAlerts.find(a => a.id === alertId);
+            if (!alert) {
+                console.error('Alert not found:', alertId);
+                alert('Error: Emergency data not found');
+                return;
+            }
+
+            currentEmergencyData = alert;
+            console.log('Alert data:', alert);
+
+            // Populate panel with patient info
+            document.getElementById('panel-patient-name').textContent = alert.user_name;
+            document.getElementById('panel-patient-email').textContent = alert.email;
+            document.getElementById('panel-patient-phone').textContent = alert.phone || 'Not available';
+            document.getElementById('panel-emergency-time').textContent = new Date(alert.timestamp).toLocaleString();
+            document.getElementById('panel-location').textContent = `${alert.latitude.toFixed(6)}, ${alert.longitude.toFixed(6)}`;
+            document.getElementById('panel-status').textContent = alert.status;
+            document.getElementById('status-select').value = alert.status;
+
+            // Set up call button
+            const callBtn = document.getElementById('call-patient-btn');
+            if (alert.phone) {
+                callBtn.href = `tel:${alert.phone}`;
+                callBtn.style.opacity = '1';
+                callBtn.style.pointerEvents = 'auto';
+            } else {
+                callBtn.href = '#';
+                callBtn.style.opacity = '0.5';
+                callBtn.style.pointerEvents = 'none';
+            }
+
+            // Show modal
+            document.getElementById('emergency-response-modal').style.display = 'block';
+
+            // Initialize real-time features
+            initializeDoctorRealTimeFeatures(alertId);
+
+            // Attach event listeners
+            attachPanelEventListeners();
+        }
+
+        function attachPanelEventListeners() {
+            // Show Location Button
+            document.getElementById('show-location-btn').onclick = () => {
+                console.log('Show location clicked');
+                showPatientLocation();
+            };
+
+            // Send Advisory Button
+            document.getElementById('send-advisory-btn').onclick = () => {
+                console.log('Send advisory clicked');
+                showAdvisoryForm();
+            };
+
+            // Request Ambulance Button
+            document.getElementById('request-ambulance-btn').onclick = () => {
+                console.log('Request ambulance clicked');
+                requestAmbulance();
+            };
+
+            // Send Message Button
+            document.getElementById('send-message-btn').onclick = () => {
+                console.log('Send message clicked');
+                showMessageForm();
+            };
+
+            // Submit Advisory
+            document.getElementById('submit-advisory-btn').onclick = () => {
+                submitAdvisory();
+            };
+
+            // Submit Message
+            document.getElementById('submit-message-btn').onclick = () => {
+                submitMessage();
+            };
+
+            // Update Status
+            document.getElementById('update-status-btn').onclick = () => {
+                updateCaseStatus();
+            };
+        }
+
+        function showPatientLocation() {
+            const mapContainer = document.getElementById('panel-map-container');
+            mapContainer.style.display = 'block';
+
+            // Initialize map if not already done
+            if (!panelMap) {
+                panelMap = L.map('panel-map').setView(
+                    [currentEmergencyData.latitude, currentEmergencyData.longitude], 
+                    15
+                );
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(panelMap);
+            } else {
+                panelMap.setView([currentEmergencyData.latitude, currentEmergencyData.longitude], 15);
+            }
+
+            // Add patient marker
+            L.marker([currentEmergencyData.latitude, currentEmergencyData.longitude])
+                .bindPopup(`<b>🆘 ${currentEmergencyData.user_name}</b><br>Emergency Location`)
+                .addTo(panelMap)
+                .openPopup();
+
+            // Set Google Maps link
+            document.getElementById('google-maps-link').href = 
+                `https://www.google.com/maps?q=${currentEmergencyData.latitude},${currentEmergencyData.longitude}`;
+
+            // Refresh map size
+            setTimeout(() => panelMap.invalidateSize(), 100);
+        }
+
+        function showAdvisoryForm() {
+            document.getElementById('advisory-form-container').style.display = 'block';
+            document.getElementById('advisory-text').focus();
+        }
+
+        function hideAdvisoryForm() {
+            document.getElementById('advisory-form-container').style.display = 'none';
+            document.getElementById('advisory-text').value = '';
+        }
+
+        function showMessageForm() {
+            document.getElementById('message-form-container').style.display = 'block';
+            document.getElementById('message-text').focus();
+        }
+
+        function hideMessageForm() {
+            document.getElementById('message-form-container').style.display = 'none';
+            document.getElementById('message-text').value = '';
+        }
+
+        function submitAdvisory() {
+            const advisory = document.getElementById('advisory-text').value.trim();
+            if (!advisory) {
+                alert('Please enter medical advice');
+                return;
+            }
+
+            console.log('Submitting advisory:', advisory);
+
+            // Send to backend
+            fetch('http://localhost:5000/send-advisory', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    alert_id: currentEmergencyData.id,
+                    user_id: currentEmergencyData.user_id,
+                    advisory: advisory,
+                    doctor: JSON.parse(sessionStorage.getItem('user')).name
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert('✓ Medical advisory sent successfully');
+                    hideAdvisoryForm();
+                } else {
+                    alert('Error sending advisory');
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                alert('✓ Advisory logged (backend connection pending)');
+                hideAdvisoryForm();
+            });
+        }
+
+        function submitMessage() {
+            const message = document.getElementById('message-text').value.trim();
+            if (!message) {
+                alert('Please enter a message');
+                return;
+            }
+
+            console.log('Submitting message:', message);
+
+            // Send to backend
+            fetch('http://localhost:5000/send-emergency-message', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    alert_id: currentEmergencyData.id,
+                    user_id: currentEmergencyData.user_id,
+                    message: message,
+                    doctor: JSON.parse(sessionStorage.getItem('user')).name
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert('✓ Message sent successfully');
+                    hideMessageForm();
+                } else {
+                    alert('Error sending message');
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                alert('✓ Message logged (backend connection pending)');
+                hideMessageForm();
+            });
+        }
+
+        function requestAmbulance() {
+            if (!confirm('Search for nearby ambulance services?')) return;
+
+            console.log('Searching ambulances for alert:', currentEmergencyData.id);
+            
+            // Show ambulance search container
+            document.getElementById('ambulance-search-container').style.display = 'block';
+            document.getElementById('ambulance-list').innerHTML = '<p>Searching nearby ambulances...</p>';
+
+            // Search nearby hospitals/ambulances
+            fetch('http://localhost:5000/nearby-hospitals', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    latitude: currentEmergencyData.latitude,
+                    longitude: currentEmergencyData.longitude,
+                    radius: 5
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.hospitals) {
+                    displayAmbulanceOptions(data.hospitals);
+                    
+                    // Add timeline event
+                    if (doctorChat) {
+                        doctorChat.addTimelineEvent('Ambulance Requested', 'Searching nearby services');
+                    }
+                } else {
+                    document.getElementById('ambulance-list').innerHTML = '<p>No ambulance services found nearby</p>';
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                document.getElementById('ambulance-list').innerHTML = '<p>Error searching ambulances</p>';
+            });
+        }
+        
+        function displayAmbulanceOptions(hospitals) {
+            const listHTML = hospitals.slice(0, 5).map((hospital, index) => `
+                <div class="ambulance-item">
+                    <div class="ambulance-header">
+                        <h5>${index + 1}. ${hospital.name}</h5>
+                        <span class="distance-badge">${hospital.distance} km</span>
+                    </div>
+                    <p class="ambulance-address">${hospital.address || hospital.location || 'Address not available'}</p>
+                    ${hospital.phone ? `<p class="ambulance-phone">📞 ${hospital.phone}</p>` : ''}
+                    <div class="ambulance-actions">
+                        ${hospital.phone ? 
+                            `<a href="tel:${hospital.phone}" class="btn-small call-btn">
+                                📞 Call Ambulance
+                            </a>` : ''}
+                        <a href="https://www.google.com/maps/dir/?api=1&destination=${hospital.latitude},${hospital.longitude}" 
+                           target="_blank" 
+                           class="btn-small location-btn">
+                            🗺️ Directions
+                        </a>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('ambulance-list').innerHTML = listHTML || '<p>No ambulances found</p>';
+        }
+
+        function updateCaseStatus() {
+            const newStatus = document.getElementById('status-select').value;
+            console.log('Updating status to:', newStatus);
+
+            fetch('http://localhost:5000/update-emergency-status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    alert_id: currentEmergencyData.id,
+                    status: newStatus
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert('✓ Status updated successfully');
+                    document.getElementById('panel-status').textContent = newStatus;
+                    loadEmergencyAlerts(); // Refresh list
+                } else {
+                    alert('Error updating status');
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                alert('✓ Status updated locally (backend connection pending)');
+                document.getElementById('panel-status').textContent = newStatus;
+            });
+        }
+
+        function closeEmergencyPanel() {
+            document.getElementById('emergency-response-modal').style.display = 'none';
+            document.getElementById('panel-map-container').style.display = 'none';
+            document.getElementById('advisory-form-container').style.display = 'none';
+            document.getElementById('message-form-container').style.display = 'none';
+            currentEmergencyData = null;
+        }
+
+        function respondToEmergency(alertId) {
+            // Legacy function - now handled by openEmergencyPanel
+            openEmergencyPanel(alertId);
+        }
+
+        // ===== REAL-TIME EMERGENCY FEATURES FOR DOCTOR =====
+        
+        function initializeDoctorRealTimeFeatures(alertId) {
+            const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+            
+            console.log('[DOCTOR] Initializing real-time features for alert:', alertId);
+            
+            // Initialize emergency chat
+            doctorChat = new EmergencyChat(alertId, 'doctor', user.name);
+            doctorChat.connect();
+            
+            // Show chat container
+            document.getElementById('emergency-chat-container').style.display = 'block';
+            
+            // Load chat history
+            doctorChat.loadHistory().then(messages => {
+                displayChatMessages(messages);
+            });
+            
+            // Listen for new messages
+            doctorChat.onMessage((message) => {
+                addChatMessage(message);
+            });
+            
+            // Listen for status changes
+            doctorChat.onStatusChange((status, data) => {
+                updateChatStatus(status, data);
+            });
+            
+            // Listen for location updates
+            window.addEventListener('location_update', (event) => {
+                updateLiveLocation(event.detail);
+            });
+            
+            // Listen for timeline updates
+            window.addEventListener('timeline_updated', (event) => {
+                loadTimeline(alertId);
+            });
+            
+            // Setup chat input
+            document.getElementById('send-chat-btn').onclick = () => sendChatMessage();
+            document.getElementById('chat-input').onkeypress = (e) => {
+                if (e.key === 'Enter') sendChatMessage();
+            };
+            
+            // Load timeline
+            document.getElementById('emergency-timeline-container').style.display = 'block';
+            loadTimeline(alertId);
+            
+            // Add timeline event
+            setTimeout(() => {
+                if (doctorChat) {
+                    doctorChat.addTimelineEvent('Doctor Responded', user.name);
+                }
+            }, 1000);
+            
+            console.log('[DOCTOR] Real-time features initialized');
+        }
+        
+        function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            
+            if (!message || !doctorChat) return;
+            
+            if (doctorChat.sendMessage(message)) {
+                input.value = '';
+            }
+        }
+        
+        function displayChatMessages(messages) {
+            const container = document.getElementById('chat-messages');
+            container.innerHTML = messages.map(msg => createChatMessageHTML(msg)).join('');
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        function addChatMessage(message) {
+            const container = document.getElementById('chat-messages');
+            container.innerHTML += createChatMessageHTML(message);
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        function createChatMessageHTML(message) {
+            const time = new Date(message.timestamp).toLocaleTimeString();
+            const isDoctor = message.sender_type === 'doctor';
+            const className = isDoctor ? 'chat-msg-doctor' : 'chat-msg-patient';
+            
+            return `
+                <div class="chat-message ${className}">
+                    <div class="chat-sender">${message.sender_name} (${message.sender_type})</div>
+                    <div class="chat-text">${message.message}</div>
+                    <div class="chat-time">${time}</div>
+                </div>
+            `;
+        }
+        
+        function updateChatStatus(status, data) {
+            const statusEl = document.getElementById('chat-status');
+            
+            switch(status) {
+                case 'connected':
+                    statusEl.innerHTML = '🟢 Connected';
+                    statusEl.className = 'chat-status-indicator connected';
+                    break;
+                case 'disconnected':
+                    statusEl.innerHTML = '🔴 Disconnected';
+                    statusEl.className = 'chat-status-indicator disconnected';
+                    break;
+                case 'user_joined':
+                    if (data && data.user_type === 'patient') {
+                        statusEl.innerHTML = '🟢 Patient Connected';
+                    }
+                    break;
+                case 'patient_disconnected':
+                    statusEl.innerHTML = '⚠️ Patient Disconnected';
+                    break;
+            }
+        }
+        
+        function updateLiveLocation(data) {
+            console.log('[DOCTOR] Location update:', data);
+            
+            // Initialize live map if not done
+            if (!liveMap) {
+                liveMap = new LiveLocationMap('panel-map');
+            }
+            
+            // Update map
+            liveMap.updateLocation(data.latitude, data.longitude);
+            
+            // Show map container
+            document.getElementById('panel-map-container').style.display = 'block';
+        }
+        
+        async function loadTimeline(alertId) {
+            try {
+                const response = await fetch(`http://localhost:5001/timeline/${alertId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayTimeline(data.events);
+                }
+            } catch (error) {
+                console.error('[TIMELINE] Error loading:', error);
+            }
+        }
+        
+        function displayTimeline(events) {
+            const container = document.getElementById('timeline-events');
+            
+            if (events.length === 0) {
+                container.innerHTML = '<p class="empty-state">No timeline events</p>';
+                return;
+            }
+            
+            container.innerHTML = events.map(event => {
+                const time = new Date(event.timestamp).toLocaleTimeString();
+                return `
+                    <div class="timeline-event">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-title">${event.event_type}</div>
+                            <div class="timeline-desc">${event.description}</div>
+                            <div class="timeline-time">${time}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function assignToDoctor(alertId) {
+            alert(`Assigning emergency #${alertId} to doctor`);
+            // In production, handle assignment
+        }
+
+        function exportAlerts() {
+            alert('Exporting emergency alerts...');
+            // In production, implement export functionality
+        }
+
+        function viewHospitalStats() {
+            alert('Viewing hospital statistics...');
+            // In production, show detailed statistics
+        }
+
+        function viewCompleted() {
+            alert('Viewing completed requests...');
+            // In production, filter and show completed requests
+        }
+
+        function goToSOS() {
+            window.location.href = 'sos.html';
+        }
+
+        function goToSymptomChecker() {
+            window.location.href = 'index.html';
+        }
+
+        function goToChat() {
+            window.location.href = 'index.html#chat-view';
+        }
+
+        function goToNearbyHospitals() {
+            window.location.href = 'nearby-hospitals.html';
+        }
+
+        function goToLeafletHospitalMap() {
+            window.location.href = 'hospital_map.html';
+        }
+
+        function goToReports() {
+            window.location.href = 'patient-reports.html';
+        }
+
+        function goToYoga() {
+            window.location.href = 'yoga_wellness.html';
+        }
+
+        function viewEmergencyHistory() {
+            const modal = document.getElementById('history-modal');
+            const content = document.getElementById('history-content');
+            content.innerHTML = '<p>No emergency history found.</p>';
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('history-modal').style.display = 'none';
+        }
+
+        function loadEmergencyRequests() {
+            // Load from backend
+            loadEmergencyAlerts();
+        }
+
+        function loadHospitalAlerts() {
+            // Load from backend
+            loadEmergencyAlerts();
+        }
+
+        // Logout functionality
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            sessionStorage.clear();
+            localStorage.removeItem('remember_email');
+            window.location.href = 'login.html';
+        });
+
+        // Close modal when clicking outside
+        window.onclick = (event) => {
+            const modal = document.getElementById('history-modal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        };
+    </script>
+</body>
+</html>

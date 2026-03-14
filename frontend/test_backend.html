@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backend Connection Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover { background: #45a049; }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔧 Backend Connection Test</h1>
+        <p>Use this page to test if your backend server is running correctly.</p>
+        
+        <div>
+            <button onclick="testServerConnection()">1. Test Server Connection</button>
+            <button onclick="testExerciseAPI()">2. Test Exercise API</button>
+            <button onclick="testWithRealUser()">3. Test with User ID</button>
+        </div>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function showResult(message, type = 'info') {
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = `result ${type}`;
+            resultDiv.textContent = message;
+        }
+
+        async function testServerConnection() {
+            showResult('Testing server connection...', 'info');
+            
+            try {
+                const response = await fetch('http://localhost:5000/symptoms', {
+                    method: 'GET'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    showResult(`✅ SUCCESS!\n\nBackend server is running on http://localhost:5000\nSymptoms endpoint returned ${data.symptoms?.length || 0} symptoms`, 'success');
+                } else {
+                    showResult(`⚠️ Server responded but with error:\nStatus: ${response.status}\nMessage: ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ FAILED!\n\nCannot connect to backend server.\n\nError: ${error.message}\n\nPlease ensure:\n1. Backend server is running\n2. Run: cd backend && python app.py\n3. Server should start on http://localhost:5000`, 'error');
+            }
+        }
+
+        async function testExerciseAPI() {
+            showResult('Testing exercise API endpoint...', 'info');
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/exercise/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: 999,
+                        exerciseType: 'Test Exercise'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showResult(`✅ SUCCESS!\n\nExercise API is working!\n\nResponse:\n${JSON.stringify(data, null, 2)}`, 'success');
+                } else {
+                    showResult(`⚠️ API responded but with error:\n\n${JSON.stringify(data, null, 2)}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ FAILED!\n\nError: ${error.message}\n\nThe exercise API endpoint is not responding.`, 'error');
+            }
+        }
+
+        async function testWithRealUser() {
+            const userId = prompt('Enter your user ID (check sessionStorage or use 1 for testing):');
+            
+            if (!userId) {
+                showResult('Test cancelled - no user ID provided', 'info');
+                return;
+            }
+            
+            showResult(`Testing with user ID: ${userId}...`, 'info');
+            
+            try {
+                // Test start exercise
+                const startResponse = await fetch('http://localhost:5000/api/exercise/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: parseInt(userId),
+                        exerciseType: 'Morning Yoga'
+                    })
+                });
+                
+                const startData = await startResponse.json();
+                
+                if (startData.success) {
+                    showResult(`✅ SUCCESS!\n\nExercise started for user ${userId}\n\nExercise ID: ${startData.exercise_id}\n\nFull Response:\n${JSON.stringify(startData, null, 2)}`, 'success');
+                } else {
+                    showResult(`⚠️ Failed to start exercise:\n\n${JSON.stringify(startData, null, 2)}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ FAILED!\n\nError: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

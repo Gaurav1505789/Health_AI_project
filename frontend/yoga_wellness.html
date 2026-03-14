@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yoga & Wellness - Health AI</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="yoga_style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="dashboard-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1>🧘 Yoga & Wellness</h1>
+            </div>
+            <div class="nav-menu">
+                <a href="dashboard.html" class="btn-secondary">← Back to Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="yoga-main">
+        <!-- Wellness Progress -->
+        <section class="wellness-progress">
+            <h2>Today's Wellness Progress</h2>
+            <div class="progress-stats">
+                <div class="stat-item">
+                    <span class="stat-value" id="completed-count">0</span>
+                    <span class="stat-label">Exercises Completed</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="total-time">0</span>
+                    <span class="stat-label">Minutes Practiced</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="streak-days">1</span>
+                    <span class="stat-label">Day Streak</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Today's Exercise Tracker -->
+        <section class="exercise-tracker">
+            <h2>🌅 Morning Exercise Tracker</h2>
+            <div class="tracker-card" id="tracker-card">
+                <div id="exercise-status">
+                    <p class="status-text">Start your morning exercise routine</p>
+                    <button class="btn-primary btn-large" id="start-exercise-btn" onclick="startMorningExercise()">Start Morning Exercise</button>
+                </div>
+            </div>
+            
+            <!-- Weekly Progress -->
+            <div class="weekly-progress">
+                <h3>Weekly Activity</h3>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="weekly-progress-bar"></div>
+                </div>
+                <p class="progress-text" id="progress-text">0 / 7 days completed</p>
+                <div class="weekly-calendar" id="weekly-calendar">
+                    <!-- Days will be loaded by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Daily Routines -->
+        <section class="daily-routines">
+            <h2>📅 Daily Exercise Plan</h2>
+            <div class="routine-grid">
+                <div class="routine-card">
+                    <h3>🌅 Morning Routine</h3>
+                    <ul class="routine-list">
+                        <li>Stretching – 5 minutes</li>
+                        <li>Surya Namaskar – 10 minutes</li>
+                        <li>Deep Breathing – 5 minutes</li>
+                    </ul>
+                    <button class="btn-primary" onclick="startRoutine('morning')">Start Morning Routine</button>
+                </div>
+                <div class="routine-card">
+                    <h3>🌆 Evening Routine</h3>
+                    <ul class="routine-list">
+                        <li>Walking – 20 minutes</li>
+                        <li>Light Yoga – 10 minutes</li>
+                        <li>Meditation – 5 minutes</li>
+                    </ul>
+                    <button class="btn-primary" onclick="startRoutine('evening')">Start Evening Routine</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Yoga Poses -->
+        <section class="yoga-poses">
+            <h2>🧘 Daily Yoga Routine</h2>
+            <div class="poses-grid" id="poses-grid">
+                <!-- Poses will be loaded by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Breathing Exercises -->
+        <section class="breathing-section">
+            <h2>🌬️ Breathing Exercises</h2>
+            <div class="breathing-grid">
+                <div class="breathing-card">
+                    <h3>Anulom Vilom (Alternate Nostril)</h3>
+                    <p>Duration: 5 minutes</p>
+                    <p>Benefits: Reduces stress, improves lung capacity</p>
+                    <button class="btn-primary" onclick="startBreathing('anulom')">Start Exercise</button>
+                </div>
+                <div class="breathing-card">
+                    <h3>Kapalbhati (Skull Shining)</h3>
+                    <p>Duration: 3 minutes</p>
+                    <p>Benefits: Detoxifies body, energizes mind</p>
+                    <button class="btn-primary" onclick="startBreathing('kapalbhati')">Start Exercise</button>
+                </div>
+                <div class="breathing-card">
+                    <h3>Bhramari (Bee Breath)</h3>
+                    <p>Duration: 5 minutes</p>
+                    <p>Benefits: Calms mind, reduces anxiety</p>
+                    <button class="btn-primary" onclick="startBreathing('bhramari')">Start Exercise</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Health Tips -->
+        <section class="health-tips">
+            <h2>💡 Health Tips</h2>
+            <div class="tips-grid">
+                <div class="tip-card">💧 Drink 8 glasses of water daily</div>
+                <div class="tip-card">😴 Sleep 7-8 hours every night</div>
+                <div class="tip-card">🚫 Avoid junk food and processed items</div>
+                <div class="tip-card">🧘 Practice yoga daily for 20 minutes</div>
+                <div class="tip-card">🚶 Walk at least 8000 steps per day</div>
+                <div class="tip-card">🥗 Eat fresh fruits and vegetables</div>
+                <div class="tip-card">🧠 Meditate for mental clarity</div>
+                <div class="tip-card">📱 Limit screen time before bed</div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Exercise Timer Modal -->
+    <div id="timer-modal" class="modal" style="display: none;">
+        <div class="modal-content timer-content">
+            <span class="close" onclick="closeTimer()">&times;</span>
+            <h2 id="timer-pose-name">Exercise Timer</h2>
+            <div class="timer-display">
+                <div class="timer-circle">
+                    <span id="timer-value">60</span>
+                    <span class="timer-unit">seconds</span>
+                </div>
+            </div>
+            <div class="timer-controls">
+                <button id="start-timer-btn" class="btn-primary" onclick="startTimer()">Start</button>
+                <button id="pause-timer-btn" class="btn-secondary" onclick="pauseTimer()" style="display: none;">Pause</button>
+                <button id="reset-timer-btn" class="btn-secondary" onclick="resetTimer()">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Demo Modal -->
+    <div id="video-modal" class="modal" style="display: none;">
+        <div class="modal-content video-content">
+            <span class="close" onclick="closeVideo()">&times;</span>
+            <h2 id="video-pose-name">Pose Demonstration</h2>
+            <div id="video-container" class="video-container"></div>
+        </div>
+    </div>
+
+    <script src="yoga.js"></script>
+</body>
+</html>

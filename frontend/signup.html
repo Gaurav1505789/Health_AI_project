@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health AI - Sign Up</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="auth-box">
+            <!-- Header Section -->
+            <header class="auth-header">
+                <h1>Health AI</h1>
+                <p class="tag-line">Emergency Health Care System</p>
+            </header>
+
+            <!-- Sign Up Form -->
+            <form id="signup-form" class="auth-form">
+                <h2>Create Account</h2>
+                <p class="form-subtitle">Join our healthcare network</p>
+
+                <!-- Name Field -->
+                <div class="form-group">
+                    <label for="signup-name">Full Name</label>
+                    <input 
+                        type="text" 
+                        id="signup-name" 
+                        name="name" 
+                        placeholder="Enter your full name"
+                        required
+                    >
+                </div>
+
+                <!-- Email Field -->
+                <div class="form-group">
+                    <label for="signup-email">Email Address</label>
+                    <input 
+                        type="email" 
+                        id="signup-email" 
+                        name="email" 
+                        placeholder="your.email@example.com"
+                        required
+                    >
+                </div>
+
+                <!-- Password Field -->
+                <div class="form-group">
+                    <label for="signup-password">Password</label>
+                    <input 
+                        type="password" 
+                        id="signup-password" 
+                        name="password" 
+                        placeholder="Create a strong password"
+                        required
+                    >
+                </div>
+
+                <!-- Role Selection Dropdown -->
+                <div class="form-group">
+                    <label for="signup-role">Select Your Role</label>
+                    <select id="signup-role" name="role" required>
+                        <option value="">-- Choose Your Role --</option>
+                        <option value="Patient">🏥 Patient - Looking for health guidance</option>
+                        <option value="Doctor">👨‍⚕️ Doctor - Providing medical services</option>
+                        <option value="Hospital">🏢 Hospital - Managing healthcare facility</option>
+                    </select>
+                </div>
+
+                <!-- Signup Status Message -->
+                <div id="signup-message" class="form-message" style="display: none;"></div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn-primary" id="signup-btn">Create Account</button>
+
+                <!-- Login Link -->
+                <p class="auth-link">
+                    Already have an account? <a href="login.html">Login here</a>
+                </p>
+            </form>
+        </div>
+
+        <!-- Illustration/Info Section -->
+        <div class="auth-info">
+            <div class="info-content">
+                <h3>Why Join Health AI?</h3>
+                <ul class="benefits-list">
+                    <li>✓ AI-powered symptom analysis</li>
+                    <li>✓ Emergency SOS alerts</li>
+                    <li>✓ Connect with verified doctors</li>
+                    <li>✓ Real-time hospital locator</li>
+                    <li>✓ 24/7 health assistance</li>
+                    <li>✓ Secure health records</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+    <script>
+        // Handle signup form submission
+        document.getElementById('signup-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('signup-name').value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const role = document.getElementById('signup-role').value;
+            
+            const messageDiv = document.getElementById('signup-message');
+            
+            try {
+                const response = await fetch('http://localhost:5000/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, email, password, role })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    messageDiv.className = 'form-message success';
+                    messageDiv.textContent = '✓ Account created successfully! Redirecting to login...';
+                    messageDiv.style.display = 'block';
+                    
+                    // Store email for auto-fill on login
+                    localStorage.setItem('signup_email', email);
+                    
+                    // Redirect to login after 2 seconds
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                } else {
+                    messageDiv.className = 'form-message error';
+                    messageDiv.textContent = '✗ ' + (data.error || 'Signup failed');
+                    messageDiv.style.display = 'block';
+                }
+            } catch (error) {
+                messageDiv.className = 'form-message error';
+                messageDiv.textContent = '✗ Network error. Please try again.';
+                messageDiv.style.display = 'block';
+                console.error('Signup error:', error);
+            }
+        });
+    </script>
+</body>
+</html>

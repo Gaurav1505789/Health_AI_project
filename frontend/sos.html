@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health AI - Emergency SOS</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Leaflet.js CSS for map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        #emergency-map {
+            height: 400px;
+            width: 100%;
+            border-radius: 12px;
+            margin-top: 20px;
+            display: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .map-section {
+            margin: 20px 0;
+        }
+        .hospital-list {
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .hospital-item {
+            background: #f8f9fa;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+    </style>
+</head>
+<body class="sos-page">
+    <!-- Navigation Bar -->
+    <nav class="sos-nav">
+        <div class="nav-container">
+            <a href="dashboard.html" class="nav-back">← Back to Dashboard</a>
+            <h1>Emergency SOS</h1>
+            <span></span>
+        </div>
+    </nav>
+
+    <!-- Main SOS Content -->
+    <main class="sos-container">
+        <!-- Information Section -->
+        <section class="sos-info">
+            <h2>🆘 Emergency Alert System</h2>
+            <p>Click the button below to send an emergency alert with your location to nearby medical professionals.</p>
+            <div class="info-box">
+                <p>📍 <strong>Your Location:</strong> <span id="location-status">Getting location...</span></p>
+                <p>👤 <strong>User:</strong> <span id="sos-user-name">Loading...</span></p>
+                <p>📧 <strong>Email:</strong> <span id="sos-user-email">Loading...</span></p>
+            </div>
+        </section>
+
+        <!-- Large SOS Button Section -->
+        <section class="sos-button-section">
+            <div class="sos-button-container">
+                <!-- Main SOS Button -->
+                <button id="sos-button" class="sos-button" onclick="activateSOS()">
+                    <span class="sos-icon">🆘</span>
+                    <span class="sos-text">EMERGENCY SOS</span>
+                </button>
+
+                <!-- Pulse Animation Ring -->
+                <div class="pulse-ring"></div>
+                <div class="pulse-ring delay-1"></div>
+                <div class="pulse-ring delay-2"></div>
+            </div>
+
+            <!-- Countdown Timer (Hidden by default) -->
+            <div id="countdown-section" class="countdown-section" style="display: none;">
+                <p class="countdown-title">Alert being sent in:</p>
+                <div class="countdown-timer">
+                    <span id="countdown-value">5</span>
+                    <span class="countdown-unit">s</span>
+                </div>
+                <button id="cancel-btn" class="btn-danger" onclick="cancelSOS()">
+                    ✕ Cancel Alert
+                </button>
+            </div>
+
+            <!-- Success Message -->
+            <div id="success-message" class="success-message alert-box" style="display: none;">
+                <h3>✓ Emergency Alert Sent!</h3>
+                <p>Medical professionals have been notified of your emergency.</p>
+                <div class="alert-details">
+                    <p><strong>Alert ID:</strong> <span id="alert-id">--</span></p>
+                    <p><strong>Severity:</strong> <span class="severity-badge critical">CRITICAL</span></p>
+                    <p><strong>Status:</strong> <span id="alert-status">Sent</span></p>
+                </div>
+                
+                <!-- Hospital Map Section -->
+                <div class="map-section">
+                    <h4>🏥 Nearby Hospitals</h4>
+                    <div id="emergency-map"></div>
+                    <div id="hospital-list" class="hospital-list"></div>
+                </div>
+                
+                <button class="btn-primary" onclick="backToDashboard()">Back to Dashboard</button>
+            </div>
+
+            <!-- Error Message -->
+            <div id="error-message" class="error-message alert-box" style="display: none;">
+                <h3>✗ Error Sending Alert</h3>
+                <p id="error-text">An error occurred while sending the emergency alert.</p>
+                <button class="btn-primary" onclick="resetSOS()">Try Again</button>
+            </div>
+        </section>
+
+        <!-- Important Information Section -->
+        <section class="sos-instructions">
+            <h3>⚠️ Important Information</h3>
+            <div class="instruction-grid">
+                <div class="instruction-card">
+                    <h4>🚨 When to Use SOS</h4>
+                    <ul>
+                        <li>Life-threatening emergencies</li>
+                        <li>Severe chest pain</li>
+                        <li>Difficulty breathing</li>
+                        <li>Loss of consciousness</li>
+                        <li>Severe injuries</li>
+                    </ul>
+                </div>
+
+                <div class="instruction-card">
+                    <h4>📍 Location Sharing</h4>
+                    <ul>
+                        <li>Your device location will be shared</li>
+                        <li>Location helps responders find you</li>
+                        <li>Allow location permission when prompted</li>
+                        <li>Accurate GPS improves response time</li>
+                    </ul>
+                </div>
+
+                <div class="instruction-card">
+                    <h4>🏥 What Happens Next</h4>
+                    <ul>
+                        <li>Nearby doctors receive alert</li>
+                        <li>Hospitals are notified</li>
+                        <li>Ambulance may be dispatched</li>
+                        <li>You'll receive status updates</li>
+                        <li>Call 911 for immediate life threat</li>
+                    </ul>
+                </div>
+
+                <div class="instruction-card">
+                    <h4>⏱️ 5-Second Cancel</h4>
+                    <ul>
+                        <li>5-second countdown after activation</li>
+                        <li>Press Cancel to stop alert</li>
+                        <li>Alert won't be sent if cancelled</li>
+                        <li>No charge for cancelled alerts</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Emergency Contacts -->
+        <section class="emergency-contacts">
+            <h3>📞 Emergency Contacts</h3>
+            <div class="contacts-grid">
+                <div class="contact-button">
+                    <a href="tel:911" class="btn-danger">🚑 Call 911</a>
+                </div>
+                <div class="contact-button">
+                    <a href="tel:1800PATIENT" class="btn-secondary">📞 Hospital Line</a>
+                </div>
+                <div class="contact-button">
+                    <a href="sms:911" class="btn-secondary">💬 Text 911</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Scripts -->
+    <!-- Leaflet.js Library for map -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Socket.IO for real-time communication -->
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <!-- Emergency modules -->
+    <script src="emergency-chat.js"></script>
+    <script src="live-location.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // ===== GLOBAL VARIABLES =====
+        let sosCountdown = null;
+        let timeRemaining = 5;
+        let currentLocation = null;
+        let sosActive = false;
+        let emergencyMap = null; // Map initialized ONCE
+        let hospitalMarkers = []; // Store markers permanently
+        let patientMarker = null;
+        let mapInitialized = false; // Prevent re-initialization
+        let emergencyChat = null; // Real-time chat instance
+        let locationTracker = null; // Live location tracker
+        let currentAlertId = null; // Current emergency alert ID
+        let routeLine = null; // Store route line to nearest hospital
+
+        // ===== INITIALIZE ON PAGE LOAD =====
+        document.addEventListener('DOMContentLoaded', initializeSOSPage);
+
+        function initializeSOSPage() {
+            const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+            if (!user.id) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            document.getElementById('sos-user-name').textContent = user.name;
+            document.getElementById('sos-user-email').textContent = user.email;
+
+            getSOSLocation();
+            
+            // ===== INITIALIZE MAP ONCE ON PAGE LOAD =====
+            initializeMapOnce();
+        }
+
+        /**
+         * Initialize Leaflet map ONCE when page loads
+         * Map is reused - never recreated
+         */
+        function initializeMapOnce() {
+            if (mapInitialized) return;
+            
+            const mapContainer = document.getElementById('emergency-map');
+            if (!mapContainer) return;
+            
+            // Create map (hidden initially)
+            emergencyMap = L.map('emergency-map').setView([28.6139, 77.2090], 13);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(emergencyMap);
+            
+            mapInitialized = true;
+            console.log('✓ Map initialized once');
+        }
+
+        function getSOSLocation() {
+            const statusElement = document.getElementById('location-status');
+
+            if (!navigator.geolocation) {
+                statusElement.textContent = '❌ Geolocation not supported';
+                return;
+            }
+
+            statusElement.textContent = '🔍 Acquiring location...';
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    currentLocation = {
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                        accuracy: position.coords.accuracy
+                    };
+
+                    statusElement.innerHTML = `
+                        ✓ <strong>Lat:</strong> ${currentLocation.latitude.toFixed(6)}, 
+                        <strong>Lng:</strong> ${currentLocation.longitude.toFixed(6)}
+                    `;
+                },
+                (error) => {
+                    statusElement.textContent = '⚠️ Location unavailable';
+                }
+            );
+        }
+
+        function activateSOS() {
+            if (sosActive) return;
+
+            if (!currentLocation) {
+                alert('⚠️ Waiting for location. Please try again.');
+                return;
+            }
+
+            sosActive = true;
+            timeRemaining = 5;
+
+            document.getElementById('sos-button').style.display = 'none';
+            document.getElementById('countdown-section').style.display = 'block';
+
+            sosCountdown = setInterval(updateCountdown, 1000);
+        }
+
+        function updateCountdown() {
+            document.getElementById('countdown-value').textContent = timeRemaining;
+
+            if (timeRemaining <= 0) {
+                clearInterval(sosCountdown);
+                sendEmergencyAlert();
+            }
+
+            timeRemaining--;
+        }
+
+        function cancelSOS() {
+            clearInterval(sosCountdown);
+            sosActive = false;
+
+            document.getElementById('sos-button').style.display = 'block';
+            document.getElementById('countdown-section').style.display = 'none';
+            document.getElementById('countdown-value').textContent = '5';
+
+            timeRemaining = 5;
+            alert('🔄 Emergency alert cancelled.');
+        }
+
+        function sendEmergencyAlert() {
+            const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+            const emergencyData = {
+                user_id: user.id,
+                user_name: user.name,
+                email: user.email,
+                latitude: currentLocation.latitude,
+                longitude: currentLocation.longitude
+            };
+
+            document.getElementById('countdown-section').style.display = 'none';
+
+            fetch('http://localhost:5000/emergency', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(emergencyData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    currentAlertId = data.alert_id;
+                    document.getElementById('alert-id').textContent = `#${data.alert_id}`;
+                    document.getElementById('success-message').style.display = 'block';
+
+                    // ===== START REAL-TIME FEATURES =====
+                    initializeRealTimeFeatures(data.alert_id);
+
+                    // ===== TRIGGER HOSPITAL SEARCH - MAP STAYS VISIBLE =====
+                    showNearbyHospitalsOnMap();
+                    playSuccessSound();
+                } else {
+                    throw new Error(data.error || 'Failed to send alert');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('error-text').textContent = error.message;
+                document.getElementById('error-message').style.display = 'block';
+            });
+        }
+
+        function playSuccessSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        }
+
+        function resetSOS() {
+            sosActive = false;
+            timeRemaining = 5;
+
+            document.getElementById('sos-button').style.display = 'block';
+            document.getElementById('countdown-section').style.display = 'none';
+            document.getElementById('success-message').style.display = 'none';
+            document.getElementById('error-message').style.display = 'none';
+        }
+
+        function backToDashboard() {
+            window.location.href = 'dashboard.html';
+        }
+
+        // ===== HOSPITAL MAP FUNCTIONS =====
+        
+        /**
+         * Show nearby hospitals on map - MAP STAYS VISIBLE PERMANENTLY
+         */
+        function showNearbyHospitalsOnMap() {
+            if (!currentLocation) return;
+
+            // ===== MAKE MAP VISIBLE AND KEEP IT VISIBLE =====
+            const mapContainer = document.getElementById('emergency-map');
+            mapContainer.style.display = 'block';
+            
+            // Refresh map size after becoming visible
+            setTimeout(() => {
+                if (emergencyMap) {
+                    emergencyMap.invalidateSize();
+                    emergencyMap.setView([currentLocation.latitude, currentLocation.longitude], 13);
+                }
+            }, 100);
+            
+            addPatientMarker();
+            fetchNearbyHospitals(currentLocation.latitude, currentLocation.longitude);
+        }
+
+        /**
+         * Add patient location marker - "Your Location (Emergency)"
+         */
+        function addPatientMarker() {
+            if (patientMarker) {
+                emergencyMap.removeLayer(patientMarker);
+            }
+            
+            const patientIcon = L.divIcon({
+                html: '<div style="background: #ff4444; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">🆘</div>',
+                iconSize: [40, 40]
+            });
+
+            patientMarker = L.marker([currentLocation.latitude, currentLocation.longitude], { icon: patientIcon })
+                .bindPopup('<b>🆘 Your Location (Emergency)</b><br>Emergency Alert Active')
+                .addTo(emergencyMap);
+        }
+
+        /**
+         * Fetch nearby hospitals using backend API (handles Overpass API)
+         */
+        function fetchNearbyHospitals(lat, lon) {
+            fetch('http://localhost:5000/nearby-hospitals', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    latitude: lat,
+                    longitude: lon,
+                    radius: 5
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.hospitals && data.hospitals.length > 0) {
+                    // displayHospitalsOnMap now handles both map markers AND list display
+                    displayHospitalsOnMap(data.hospitals);
+                    
+                    // ===== ENSURE MAP STAYS VISIBLE =====
+                    document.getElementById('emergency-map').style.display = 'block';
+                } else {
+                    document.getElementById('hospital-list').innerHTML = 
+                        '<p style="color: #999; text-align: center;">No hospitals found within 5 km</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('hospital-list').innerHTML = 
+                    '<p style="color: #ff4444;">Error loading hospitals</p>';
+            });
+        }
+
+        /**
+         * Display hospital markers with directions and call buttons
+         * Markers stored in array - only cleared on new search
+         * NEAREST HOSPITAL: Highlighted with red color + route line drawn
+         */
+        function displayHospitalsOnMap(hospitals) {
+            // Clear old markers and route line
+            hospitalMarkers.forEach(marker => emergencyMap.removeLayer(marker));
+            hospitalMarkers = [];
+            if (routeLine) {
+                emergencyMap.removeLayer(routeLine);
+                routeLine = null;
+            }
+
+            // ===== CALCULATE DISTANCES AND SORT BY NEAREST =====
+            const hospitalsWithDistance = hospitals.map(hospital => {
+                if (!hospital.latitude || !hospital.longitude) return null;
+                
+                // Calculate distance using Leaflet's distance calculation (meters)
+                const userLatLng = L.latLng(currentLocation.latitude, currentLocation.longitude);
+                const hospitalLatLng = L.latLng(hospital.latitude, hospital.longitude);
+                const distanceMeters = userLatLng.distanceTo(hospitalLatLng);
+                const distanceKm = (distanceMeters / 1000).toFixed(2);
+                
+                return {
+                    ...hospital,
+                    calculatedDistance: parseFloat(distanceKm),
+                    distanceMeters: distanceMeters
+                };
+            }).filter(h => h !== null);
+
+            // Sort by distance (nearest first)
+            hospitalsWithDistance.sort((a, b) => a.calculatedDistance - b.calculatedDistance);
+
+            // ===== DRAW ROUTE LINE TO NEAREST HOSPITAL =====
+            if (hospitalsWithDistance.length > 0) {
+                const nearestHospital = hospitalsWithDistance[0];
+                routeLine = L.polyline([
+                    [currentLocation.latitude, currentLocation.longitude],
+                    [nearestHospital.latitude, nearestHospital.longitude]
+                ], {
+                    color: 'red',
+                    weight: 4,
+                    opacity: 0.7,
+                    dashArray: '10, 10'
+                }).addTo(emergencyMap);
+            }
+
+            // ===== ADD MARKERS (NEAREST = RED, OTHERS = BLUE) =====
+            hospitalsWithDistance.forEach((hospital, index) => {
+                const isNearest = index === 0;
+                
+                // Nearest hospital = RED icon, others = BLUE
+                const bgColor = isNearest ? '#ff4444' : '#667eea';
+                const hospitalIcon = L.divIcon({
+                    html: `<div style="background: ${bgColor}; color: white; width: ${isNearest ? 44 : 36}px; height: ${isNearest ? 44 : 36}px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: ${isNearest ? 20 : 18}px; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3); font-weight: bold;">${index + 1}</div>`,
+                    iconSize: [isNearest ? 44 : 36, isNearest ? 44 : 36]
+                });
+
+                // ===== POPUP WITH DIRECTIONS AND CALL BUTTONS =====
+                const popupContent = `
+                    <div style="min-width: 200px;">
+                        <h4 style="margin: 0 0 8px 0; color: ${isNearest ? '#ff4444' : '#667eea'};">
+                            🏥 ${hospital.name}
+                            ${isNearest ? '<span style="background: #ff4444; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.7em; margin-left: 5px;">NEAREST</span>' : ''}
+                        </h4>
+                        <p style="margin: 4px 0; font-weight: bold; color: ${isNearest ? '#ff4444' : '#2b7cff'};">📏 ${hospital.calculatedDistance} km away</p>
+                        <p style="margin: 4px 0; font-size: 0.9em;">${hospital.address || hospital.location || 'Address not available'}</p>
+                        ${hospital.phone ? `<p style="margin: 4px 0;">📞 ${hospital.phone}</p>` : '<p style="margin: 4px 0; color: #999;">Phone not available</p>'}
+                        <div style="margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap;">
+                            <a href="https://www.google.com/maps/dir/?api=1&destination=${hospital.latitude},${hospital.longitude}" 
+                               target="_blank" 
+                               style="background: ${isNearest ? '#ff4444' : '#667eea'}; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85em;">
+                                🗺️ Get Directions
+                            </a>
+                            ${hospital.phone ? 
+                                `<a href="tel:${hospital.phone}" 
+                                    style="background: #44ff44; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85em;">
+                                    📞 Call Hospital
+                                </a>` : ''}
+                        </div>
+                    </div>
+                `;
+
+                const marker = L.marker([hospital.latitude, hospital.longitude], { icon: hospitalIcon })
+                    .bindPopup(popupContent)
+                    .addTo(emergencyMap);
+
+                // Auto-open popup for nearest hospital
+                if (isNearest) {
+                    marker.openPopup();
+                }
+
+                hospitalMarkers.push(marker);
+            });
+
+            // Fit map to show all markers
+            const bounds = L.latLngBounds();
+            bounds.extend([currentLocation.latitude, currentLocation.longitude]);
+            hospitalMarkers.forEach(marker => bounds.extend(marker.getLatLng()));
+            emergencyMap.fitBounds(bounds, { padding: [50, 50] });
+            
+            // ===== KEEP MAP VISIBLE =====
+            document.getElementById('emergency-map').style.display = 'block';
+            
+            // Update hospital list with sorted data
+            displayHospitalList(hospitalsWithDistance);
+        }
+
+        /**
+         * Display hospital list with action buttons
+         * List is sorted by distance (nearest first)
+         */
+        function displayHospitalList(hospitals) {
+            const listHTML = hospitals.slice(0, 5).map((hospital, index) => {
+                const isNearest = index === 0;
+                const borderColor = isNearest ? '#ff4444' : '#667eea';
+                
+                return `
+                    <div class="hospital-item" style="border-left: 4px solid ${borderColor};">
+                        <h4 style="margin: 0 0 5px 0;">
+                            ${index + 1}. ${hospital.name}
+                            ${isNearest ? '<span style="background: #ff4444; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.7em; margin-left: 5px;">NEAREST</span>' : ''}
+                        </h4>
+                        <p style="margin: 3px 0; color: ${isNearest ? '#ff4444' : '#667eea'}; font-weight: bold;">📏 ${hospital.calculatedDistance || hospital.distance} km away</p>
+                        <p style="margin: 3px 0; font-size: 0.9em;">${hospital.address || hospital.location || 'Address not available'}</p>
+                        ${hospital.phone ? `<p style="margin: 3px 0;">📞 ${hospital.phone}</p>` : '<p style="margin: 3px 0; color: #999;">Phone not available</p>'}
+                        <div style="margin-top: 8px; display: flex; gap: 8px;">
+                            <a href="https://www.google.com/maps/dir/?api=1&destination=${hospital.latitude},${hospital.longitude}" 
+                               target="_blank" 
+                               style="background: ${isNearest ? '#ff4444' : '#667eea'}; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85em;">
+                                🗺️ Get Directions
+                            </a>
+                            ${hospital.phone ? 
+                                `<a href="tel:${hospital.phone}" 
+                                    style="background: #44ff44; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85em;">
+                                    📞 Call Hospital
+                                </a>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('hospital-list').innerHTML = listHTML || '<p>No hospitals found</p>';
+        }
+
+        // ===== REAL-TIME EMERGENCY FEATURES =====
+        
+        /**
+         * Initialize real-time chat and location tracking
+         */
+        function initializeRealTimeFeatures(alertId) {
+            const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+            
+            console.log('[EMERGENCY] Initializing real-time features for alert:', alertId);
+            
+            // Initialize emergency chat
+            emergencyChat = new EmergencyChat(alertId, 'patient', user.name);
+            emergencyChat.connect();
+            
+            // Initialize location tracker
+            locationTracker = new LiveLocationTracker(alertId, emergencyChat);
+            locationTracker.startTracking();
+            
+            // Add timeline event
+            setTimeout(() => {
+                if (emergencyChat) {
+                    emergencyChat.addTimelineEvent('SOS Activated', 'Patient pressed emergency SOS button');
+                }
+            }, 1000);
+            
+            console.log('[EMERGENCY] Real-time features initialized');
+        }
+        
+        // Refresh location every 30 seconds
+        setInterval(getSOSLocation, 30000);
+    </script>
+</body>
+</html>

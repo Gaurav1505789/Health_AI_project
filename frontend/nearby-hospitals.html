@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health AI - Nearby Hospitals</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Leaflet.js CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        #hospital-map { height: 100%; }
+        .leaflet-popup-content { font-family: Arial, sans-serif; }
+        .leaflet-container { background: #f0f0f0; }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="dashboard-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1>Health AI</h1>
+                <span class="tag-line">🗺️ Hospital Locator with Map</span>
+            </div>
+            <div class="nav-menu">
+                <a href="dashboard.html" class="btn-secondary">← Back to Dashboard</a>
+                <button id="logout-btn" class="btn-logout">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="hospital-main">
+        <!-- Header Section -->
+        <section class="hospital-header">
+            <h2>🏥 Find Nearby Hospitals</h2>
+            <p>Your real location on map with nearest hospitals and distance</p>
+        </section>
+
+        <div class="hospital-layout">
+            <!-- Left Sidebar - Controls -->
+            <aside class="hospital-sidebar">
+                <!-- Location Section -->
+                <section class="location-section">
+                    <div class="location-info">
+                        <p><strong>📍 Your Location:</strong></p>
+                        <p id="location-display" class="location-coords">Getting location...</p>
+                        <div id="location-status" class="status-indicator"></div>
+                    </div>
+                    
+                    <!-- Manual location input (fallback) -->
+                    <div class="location-input-group">
+                        <input type="number" id="manual-latitude" placeholder="Latitude" step="0.0001" class="location-input">
+                        <input type="number" id="manual-longitude" placeholder="Longitude" step="0.0001" class="location-input">
+                        <button class="btn-secondary" onclick="useManualLocation()">Update</button>
+                    </div>
+                </section>
+
+                <!-- Filter Section -->
+                <div class="filter-section">
+                    <h4>⚙️ Search Options</h4>
+                    
+                    <label for="radius-range">Radius: <span id="radius-value">50</span> km</label>
+                    <input type="range" id="radius-range" min="5" max="100" value="50" class="range-slider" onchange="updateRadiusValue(this.value)">
+                    
+                    <label for="hospital-filter">Filter Service:</label>
+                    <select id="hospital-filter" class="filter-select" onchange="filterAndUpdateMap()">
+                        <option value="">-- All Services --</option>
+                        <option value="Emergency">🚨 Emergency</option>
+                        <option value="ICU">🏥 ICU</option>
+                        <option value="Surgery">🔪 Surgery</option>
+                        <option value="Cardiology">❤️ Cardiology</option>
+                        <option value="Trauma Center">🚑 Trauma Center</option>
+                    </select>
+
+                    <button class="btn-primary" onclick="searchAndUpdateMap()">🔍 Search & Update Map</button>
+                </div>
+
+                <!-- Hospitals List -->
+                <section class="hospitals-sidebar-list">
+                    <h4>📋 Nearby Hospitals</h4>
+                    <div id="hospitals-sidebar" class="sidebar-hospitals">
+                        <p class="empty-state">Click Search to find hospitals</p>
+                    </div>
+                </section>
+            </aside>
+
+            <!-- Right Side - Map -->
+            <div class="map-section">
+                <div id="hospital-map" class="hospital-map-container"></div>
+                <div class="map-legend">
+                    <div class="legend-item"><span class="legend-marker" style="background: #2b7cff;">📍</span> <span>Your Location</span></div>
+                    <div class="legend-item"><span class="legend-marker" style="background: #ff4444;">🏥</span> <span>Emergency Hospital</span></div>
+                    <div class="legend-item"><span class="legend-marker" style="background: #44ff44;">🏥</span> <span>Regular Hospital</span></div>
+                    <div class="legend-item"><span class="legend-marker" style="background: #ffaa00;">🏥</span> <span>Specialist Hospital</span></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Hospital Details Modal -->
+    <div id="hospital-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeHospitalModal()">&times;</span>
+            
+            <div class="modal-header">
+                <h2 id="modal-hospital-name">Hospital Name</h2>
+                <div class="rating-section"><span class="rating">⭐ <span id="modal-rating-value">4.5</span>/5</span></div>
+            </div>
+
+            <div class="modal-body">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <strong>📍 Location:</strong>
+                        <p id="modal-location">Address</p>
+                    </div>
+                    <div class="info-item">
+                        <strong>📏 Distance:</strong>
+                        <p id="modal-distance">N/A</p>
+                    </div>
+                    <div class="info-item">
+                        <strong>🛏️ Available Beds:</strong>
+                        <p id="modal-beds">N/A</p>
+                    </div>
+                    <div class="info-item">
+                        <strong>👨‍⚕️ Doctors:</strong>
+                        <p id="modal-doctors">N/A</p>
+                    </div>
+                </div>
+
+                <div class="services-section">
+                    <strong>🏥 Services Offered:</strong>
+                    <div id="modal-services" class="services-container"></div>
+                </div>
+
+                <div class="contact-section">
+                    <strong>📞 Contact:</strong>
+                    <p>
+                        <a id="modal-phone" href="tel:" class="contact-link">Phone</a> | 
+                        <a id="modal-email" href="mailto:" class="contact-link">Email</a>
+                    </p>
+                </div>
+                <!-- Action Buttons -->
+                <div class="modal-actions">
+                    <button class="btn-primary" onclick="callHospital()">📞 Call Hospital</button>
+                    <button class="btn-secondary" onclick="getDirectionsGoogle()">🗺️ Directions on Map</button>
+                    <button class="btn-secondary" onclick="emailHospital()">📧 Send Email</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <!-- Leaflet.js Library -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script>
+        // Global Variables
+        let currentLocation = null;
+        let allHospitals = [];
+        let filteredHospitals = [];
+        let selectedHospital = null;
+        let map = null;
+        let userMarker = null;
+        let hospitalMarkers = [];
+        let hospitalCircles = [];
+        let searchRadiusCircle = null;
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', initializeHospitalPage);
+
+        // ===== PAGE INITIALIZATION =====
+        function initializeHospitalPage() {
+            // Check if user is logged in
+            const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+            if (!user.id) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Initialize map
+            const mapElement = document.getElementById('hospital-map');
+            if (mapElement) {
+                initializeMap();
+            }
+
+            // Get user location using Leaflet
+            getUserLocationWithLeaflet();
+
+            // Load all hospitals
+            loadAllHospitals();
+
+            // Logout handler
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => {
+                    sessionStorage.clear();
+                    localStorage.removeItem('remember_email');
+                    window.location.href = 'login.html';
+                });
+            }
+        }
+
+        // ===== MAP FUNCTIONS =====
+        function initializeMap() {
+            map = L.map('hospital-map').setView([28.6139, 77.2090], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(map);
+            console.log('✓ Map initialized successfully');
+        }
+
+        async function addUserMarker(lat, lng, accuracy) {
+            if (!map) return;
+
+            // Remove existing user marker
+            if (userMarker) {
+                map.removeLayer(userMarker);
+            }
+
+            // Get address
+            let address = 'Your Location';
+            try {
+                const response = await fetch('http://localhost:5000/reverse-geocode', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ latitude: lat, longitude: lng })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    address = data.display_name.substring(0, 100);
+                }
+            } catch (err) {
+                console.warn('Reverse geocoding failed:', err);
+            }
+
+            // Create blue marker for user
+            userMarker = L.circleMarker([lat, lng], {
+                radius: 10,
+                fillColor: '#2b7cff',
+                color: '#fff',
+                weight: 2,
+                opacity: 1,
+                fillOpacity: 0.8
+            }).addTo(map);
+
+            userMarker.bindPopup(`
+                <div style="font-weight: bold; color: #1e2a38;">
+                    📍 Your Location<br>
+                    <small>${address}</small><br>
+                    <small style="color: #999;">Accuracy: ±${Math.round(accuracy)}m</small>
+                </div>
+            `);
+
+            map.setView([lat, lng], 14);
+        }
+
+        function displayHospitalsOnMap(hospitals) {
+            clearHospitalMarkers();
+
+            hospitals.forEach((hospital, index) => {
+                if (!hospital.latitude || !hospital.longitude) return;
+
+                const lat = hospital.latitude;
+                const lng = hospital.longitude;
+
+                // Determine marker color based on services
+                let markerColor = '#44ff44'; // Default green
+                if (hospital.services && (hospital.services.includes('Emergency') || hospital.services.includes('Trauma Center'))) {
+                    markerColor = '#ff4444'; // Red for emergency
+                } else if (hospital.services && hospital.services.some(s => ['Cardiology', 'Neurology', 'Oncology', 'Specialist'].includes(s))) {
+                    markerColor = '#ffaa00'; // Yellow for specialist
+                }
+
+                // Create numbered circle marker
+                const marker = L.circleMarker([lat, lng], {
+                    radius: 12,
+                    fillColor: markerColor,
+                    color: '#fff',
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                }).addTo(map);
+
+                // Add number label
+                const label = L.divIcon({
+                    html: `<div style="font-size: 12px; font-weight: bold; color: white; text-align: center; line-height: 24px;">${index + 1}</div>`,
+                    iconSize: [24, 24],
+                    className: 'numbered-marker'
+                });
+
+                const numberMarker = L.marker([lat, lng], { icon: label }).addTo(map);
+
+                // Popup content
+                const popupContent = `
+                    <div style="font-family: Arial; width: 250px;">
+                        <h4 style="margin: 5px 0; color: #1e2a38;">${hospital.name}</h4>
+                        <p style="margin: 3px 0; color: #666; font-size: 0.9em;">
+                            <strong>⭐</strong> ${hospital.rating || 'N/A'}/5 | <strong>🛏️</strong> ${hospital.beds || 'N/A'} beds
+                        </p>
+                        <p style="margin: 3px 0; color: #666; font-size: 0.85em;">
+                            <strong>📍</strong> ${hospital.location || hospital.address || 'Address N/A'}
+                        </p>
+                        ${hospital.distance ? `<p style="margin: 5px 0; color: #2b7cff; font-weight: bold;">📏 ${hospital.distance.toFixed(1)} km</p>` : ''}
+                        <p style="margin: 5px 0; font-size: 0.85em;">
+                            <strong>Services:</strong> ${(hospital.services && hospital.services.length > 0) ? hospital.services.slice(0, 2).join(', ') : 'General'}
+                        </p>
+                        <button onclick="showHospitalDetail('${hospital.id}')" style="
+                            background: #2b7cff; color: white; border: none; padding: 5px 10px; 
+                            border-radius: 4px; cursor: pointer; font-size: 0.85em; margin-top: 5px;
+                        ">View Details</button>
+                    </div>
+                `;
+
+                marker.bindPopup(popupContent);
+                numberMarker.bindPopup(popupContent);
+
+                hospitalMarkers.push(marker);
+                hospitalMarkers.push(numberMarker);
+            });
+
+            // Fit map to show all markers
+            fitMapToMarkers();
+        }
+
+        function fitMapToMarkers() {
+            if (!map || hospitalMarkers.length === 0) return;
+
+            const bounds = L.latLngBounds();
+
+            if (userMarker) {
+                const latLng = userMarker.getLatLng();
+                bounds.extend(latLng);
+            }
+
+            hospitalMarkers.forEach(marker => {
+                const latLng = marker.getLatLng();
+                bounds.extend(latLng);
+            });
+
+            map.fitBounds(bounds, { padding: [50, 50] });
+        }
+
+        function clearHospitalMarkers() {
+            hospitalMarkers.forEach(marker => {
+                map.removeLayer(marker);
+            });
+            hospitalMarkers = [];
+
+            hospitalCircles.forEach(circle => {
+                map.removeLayer(circle);
+            });
+            hospitalCircles = [];
+
+            if (searchRadiusCircle) {
+                map.removeLayer(searchRadiusCircle);
+                searchRadiusCircle = null;
+            }
+        }
+
+        function drawSearchRadius(center, radiusKm) {
+            if (searchRadiusCircle) {
+                map.removeLayer(searchRadiusCircle);
+            }
+
+            searchRadiusCircle = L.circle(center, {
+                radius: radiusKm * 1000,
+                fillColor: '#2b7cff',
+                fillOpacity: 0.1,
+                color: '#2b7cff',
+                weight: 2,
+                opacity: 0.3
+            }).addTo(map);
+        }
+
+        // ===== LOCATION FUNCTIONS =====
+        function getUserLocationWithLeaflet() {
+            const statusDiv = document.getElementById('location-status');
+            const locationDisplay = document.getElementById('location-display');
+
+            locationDisplay.textContent = '🔍 Acquiring location...';
+            if (statusDiv) statusDiv.className = 'status-loading';
+
+            map.locate({ setView: true, maxZoom: 16 });
+
+            map.on('locationfound', async (e) => {
+                currentLocation = {
+                    latitude: e.latitude,
+                    longitude: e.longitude,
+                    accuracy: e.accuracy
+                };
+
+                console.log('✓ Location found:', currentLocation);
+
+                // Update display
+                document.getElementById('manual-latitude').value = currentLocation.latitude.toFixed(6);
+                document.getElementById('manual-longitude').value = currentLocation.longitude.toFixed(6);
+
+                locationDisplay.innerHTML = `
+                    ✓ <strong>Lat:</strong> ${currentLocation.latitude.toFixed(6)}<br>
+                    <strong>Lng:</strong> ${currentLocation.longitude.toFixed(6)}<br>
+                    <small style="color: #999;">Accuracy: ±${Math.round(currentLocation.accuracy)}m</small>
+                `;
+                if (statusDiv) statusDiv.className = 'status-success';
+
+                // Add marker to map
+                if (map) {
+                    await addUserMarker(currentLocation.latitude, currentLocation.longitude, currentLocation.accuracy);
+                }
+
+                // Auto-search
+                setTimeout(() => searchAndUpdateMap(), 500);
+            });
+
+            map.on('locationerror', (e) => {
+                locationDisplay.textContent = '❌ Location access denied.';
+                if (statusDiv) statusDiv.className = 'status-error';
+                console.warn('Geolocation error:', e);
+            });
+        }
+
+        function useManualLocation() {
+            const lat = parseFloat(document.getElementById('manual-latitude').value);
+            const lng = parseFloat(document.getElementById('manual-longitude').value);
+
+            if (isNaN(lat) || isNaN(lng)) {
+                alert('❌ Please enter valid coordinates');
+                return;
+            }
+
+            currentLocation = { latitude: lat, longitude: lng, accuracy: 0 };
+
+            if (map) {
+                addUserMarker(lat, lng, 0);
+            }
+
+            document.getElementById('location-display').textContent = `✓ Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;
+            alert('✓ Location updated');
+        }
+
+        // ===== SEARCH & FILTER FUNCTIONS =====
+        function searchAndUpdateMap() {
+            if (!currentLocation) {
+                alert('❌ Location not available. Please enable location access.');
+                return;
+            }
+
+            const radius = parseInt(document.getElementById('radius-range').value);
+            const statusDiv = document.getElementById('location-status');
+            if (statusDiv) statusDiv.className = 'status-loading';
+
+            // Use nearby-hospitals endpoint which queries OSM with smart fallback
+            fetch('http://localhost:5000/nearby-hospitals', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    latitude: currentLocation.latitude,
+                    longitude: currentLocation.longitude,
+                    radius: radius
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                console.log('Hospitals found:', data);
+                if (data.success && data.hospitals && data.hospitals.length > 0) {
+                    filteredHospitals = data.hospitals;
+                    allHospitals = data.hospitals;
+                    displayHospitalsOnMap(data.hospitals);
+                    displayHospitalsList(data.hospitals);
+
+                    if (map && currentLocation) {
+                        drawSearchRadius(
+                            [currentLocation.latitude, currentLocation.longitude],
+                            radius
+                        );
+                    }
+
+                    console.log(`📍 Found ${data.hospitals.length} hospitals (Source: ${data.source})`);
+                    if (statusDiv) statusDiv.className = 'status-success';
+                } else {
+                    console.warn('No hospitals returned:', data);
+                    alert(`⚠️ No hospitals found within ${radius} km. Try increasing the radius.`);
+                    clearHospitalMarkers();
+                    document.getElementById('hospitals-sidebar').innerHTML =
+                        '<p class="empty-state">No hospitals found in this radius. Try increasing search radius.</p>';
+                    if (statusDiv) statusDiv.className = 'status-error';
+                }
+            })
+            .catch(err => {
+                console.error('Error searching hospitals:', err);
+                alert('❌ Error. Please try again.');
+                if (statusDiv) statusDiv.className = 'status-error';
+            });
+        }
+
+        function filterAndUpdateMap() {
+            const selectedService = document.getElementById('hospital-filter').value;
+
+            let toDisplay = filteredHospitals;
+            if (selectedService) {
+                // For OSM data, we filter by name or search again
+                toDisplay = filteredHospitals.filter(h => 
+                    !h.services || h.services.includes(selectedService) ||
+                    (h.name && h.name.toLowerCase().includes(selectedService.toLowerCase()))
+                );
+            }
+
+            displayHospitalsOnMap(toDisplay);
+            displayHospitalsList(toDisplay);
+        }
+
+        function updateRadiusValue(value) {
+            document.getElementById('radius-value').textContent = value;
+        }
+
+        // ===== HOSPITAL LIST & MODAL FUNCTIONS =====
+        function loadAllHospitals() {
+            // No longer needed - we load hospitals in real-time from OSM
+            console.log('Real-time hospital data loaded from OpenStreetMap API');
+        }
+
+        function displayHospitalsList(hospitals) {
+            const sidebar = document.getElementById('hospitals-sidebar');
+
+            if (!hospitals || hospitals.length === 0) {
+                sidebar.innerHTML = '<p class="empty-state">No hospitals to display</p>';
+                return;
+            }
+
+            sidebar.innerHTML = hospitals.map((hospital, index) => `
+                <div class="sidebar-hospital-item" onclick="showHospitalDetail('${hospital.id}')">
+                    <div class="sidebar-item-header">
+                        <h5>${index + 1}. ${hospital.name}</h5>
+                        <span class="distance-badge">${hospital.distance ? hospital.distance.toFixed(1) : 'N/A'} km</span>
+                    </div>
+                    <div class="sidebar-item-body">
+                        <p class="rating">⭐ ${hospital.rating || 'N/A'}/5 | 🛏️ ${hospital.beds || 'N/A'} beds</p>
+                        <p class="services">${(hospital.services && hospital.services.length > 0) ? hospital.services.slice(0, 2).join(', ') : 'General'}${(hospital.services && hospital.services.length > 2) ? '...' : ''}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showHospitalDetail(hospitalId) {
+            selectedHospital = allHospitals.find(h => h.id == hospitalId) ||
+                              filteredHospitals.find(h => h.id == hospitalId);
+
+            if (!selectedHospital) return;
+
+            // Populate modal
+            document.getElementById('modal-hospital-name').textContent = selectedHospital.name;
+            document.getElementById('modal-rating-value').textContent = selectedHospital.rating || 'N/A';
+            document.getElementById('modal-location').textContent = selectedHospital.location || selectedHospital.address || 'Address N/A';
+            document.getElementById('modal-distance').textContent = selectedHospital.distance ? `${selectedHospital.distance.toFixed(1)} km` : 'N/A';
+            document.getElementById('modal-beds').textContent = selectedHospital.beds || 'N/A';
+            document.getElementById('modal-doctors').textContent = selectedHospital.doctors || 'N/A';
+
+            const phoneLink = document.getElementById('modal-phone');
+            phoneLink.textContent = selectedHospital.phone || 'N/A';
+            phoneLink.href = selectedHospital.phone ? `tel:${selectedHospital.phone}` : '#';
+
+            const emailLink = document.getElementById('modal-email');
+            emailLink.textContent = selectedHospital.email || 'N/A';
+            emailLink.href = selectedHospital.email ? `mailto:${selectedHospital.email}` : '#';
+
+            // Services
+            document.getElementById('modal-services').innerHTML = (selectedHospital.services && selectedHospital.services.length > 0)
+                ? selectedHospital.services.map(s => `<span class="service-badge">${s}</span>`).join('')
+                : '<span class="service-badge">General Services</span>';
+
+            // Show modal
+            document.getElementById('hospital-modal').style.display = 'block';
+        }
+
+        function closeHospitalModal() {
+            document.getElementById('hospital-modal').style.display = 'none';
+        }
+
+        function callHospital() {
+            if (selectedHospital && selectedHospital.phone) {
+                window.location.href = `tel:${selectedHospital.phone}`;
+            }
+        }
+
+        function emailHospital() {
+            if (selectedHospital && selectedHospital.email) {
+                window.location.href = `mailto:${selectedHospital.email}?subject=Medical%20Inquiry`;
+            }
+        }
+
+        function directToNearestHospital(hospital) {
+            if (!hospital || !currentLocation) return;
+            
+            // Open in new tab with directions
+            const url = `https://www.openstreetmap.org/directions?engine=osrm_car&route=${currentLocation.latitude}%2C${currentLocation.longitude}%3B${hospital.latitude}%2C${hospital.longitude}`;
+            window.open(url, '_blank');
+            
+            // Show notification
+            console.log(`🚑 Directing to nearest hospital: ${hospital.name} (${hospital.distance} km away)`);
+        }
+
+        function getDirectionsGoogle() {
+            if (selectedHospital && currentLocation) {
+                // Use OpenStreetMap directions instead of Google Maps
+                const url = `https://www.openstreetmap.org/directions?engine=osrm_car&route=${currentLocation.latitude}%2C${currentLocation.longitude}%3B${selectedHospital.latitude}%2C${selectedHospital.longitude}`;
+                window.open(url, '_blank');
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = (event) => {
+            const modal = document.getElementById('hospital-modal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        };
+    </script>
+</body>
+</html>

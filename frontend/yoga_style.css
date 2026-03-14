@@ -1,0 +1,545 @@
+/* Yoga & Wellness Styles */
+
+.yoga-main {
+    max-width: 1400px;
+    margin: 2rem auto;
+    padding: 0 2rem;
+}
+
+/* Wellness Progress */
+.wellness-progress {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.wellness-progress h2 {
+    margin: 0 0 1.5rem;
+    text-align: center;
+}
+
+.progress-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 2rem;
+    text-align: center;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.stat-value {
+    font-size: 3rem;
+    font-weight: 700;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* Daily Routines */
+.daily-routines {
+    margin-bottom: 3rem;
+}
+
+.daily-routines h2 {
+    color: var(--text-color);
+    margin-bottom: 1.5rem;
+}
+
+.routine-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.routine-card {
+    background: var(--card-surface);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 15px var(--shadow-color);
+    border-left: 5px solid var(--accent-color);
+}
+
+.routine-card h3 {
+    color: var(--text-color);
+    margin: 0 0 1rem;
+}
+
+.routine-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.5rem;
+}
+
+.routine-list li {
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background: var(--card-color);
+    border-radius: 8px;
+    color: var(--text-color);
+}
+
+/* Yoga Poses Grid */
+.yoga-poses {
+    margin-bottom: 3rem;
+}
+
+.yoga-poses h2 {
+    color: var(--text-color);
+    margin-bottom: 1.5rem;
+}
+
+.poses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+}
+
+.pose-card {
+    background: var(--card-surface);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px var(--shadow-color);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+}
+
+.pose-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px var(--shadow-color);
+}
+
+.pose-card.completed {
+    border: 2px solid #28a745;
+}
+
+.pose-icon {
+    font-size: 4rem;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.pose-card h3 {
+    color: var(--text-color);
+    margin: 0 0 0.5rem;
+    text-align: center;
+}
+
+.pose-english {
+    color: var(--muted-text);
+    text-align: center;
+    font-size: 0.9rem;
+    margin: 0 0 1rem;
+}
+
+.pose-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.difficulty {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.difficulty.beginner {
+    background: #d4edda;
+    color: #155724;
+}
+
+.difficulty.intermediate {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.difficulty.advanced {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.duration {
+    color: var(--muted-text);
+    font-size: 0.9rem;
+}
+
+.pose-benefits {
+    background: var(--card-color);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.pose-benefits strong {
+    color: var(--text-color);
+}
+
+.pose-benefits ul {
+    margin: 0.5rem 0 0;
+    padding-left: 1.5rem;
+}
+
+.pose-benefits li {
+    color: var(--muted-text);
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.pose-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.pose-actions button {
+    flex: 1;
+    padding: 0.75rem;
+    font-size: 0.9rem;
+}
+
+.completed-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: #28a745;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+/* Breathing Exercises */
+.breathing-section {
+    margin-bottom: 3rem;
+}
+
+.breathing-section h2 {
+    color: var(--text-color);
+    margin-bottom: 1.5rem;
+}
+
+.breathing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.breathing-card {
+    background: var(--card-surface);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px var(--shadow-color);
+    text-align: center;
+}
+
+.breathing-card h3 {
+    color: var(--text-color);
+    margin: 0 0 1rem;
+}
+
+.breathing-card p {
+    color: var(--muted-text);
+    margin: 0.5rem 0;
+}
+
+/* Health Tips */
+.health-tips {
+    margin-bottom: 3rem;
+}
+
+.health-tips h2 {
+    color: var(--text-color);
+    margin-bottom: 1.5rem;
+}
+
+.tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.tip-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    transition: transform 0.3s ease;
+}
+
+.tip-card:hover {
+    transform: scale(1.05);
+}
+
+/* Timer Modal */
+.timer-content {
+    max-width: 500px;
+    text-align: center;
+}
+
+.timer-display {
+    margin: 2rem 0;
+}
+
+.timer-circle {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+}
+
+#timer-value {
+    font-size: 4rem;
+    font-weight: 700;
+}
+
+.timer-unit {
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+.timer-controls {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.timer-controls button {
+    padding: 0.75rem 2rem;
+}
+
+/* Video Modal */
+.video-content {
+    max-width: 800px;
+}
+
+.video-container {
+    margin-top: 1rem;
+}
+
+.video-container iframe {
+    border-radius: 8px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .yoga-main {
+        padding: 0 1rem;
+    }
+
+    .poses-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .routine-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .breathing-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .tips-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .timer-circle {
+        width: 150px;
+        height: 150px;
+    }
+
+    #timer-value {
+        font-size: 3rem;
+    }
+
+    .pose-actions {
+        flex-direction: column;
+    }
+}
+
+
+/* Exercise Tracker */
+.exercise-tracker {
+    margin-bottom: 3rem;
+}
+
+.exercise-tracker h2 {
+    color: var(--text-color);
+    margin-bottom: 1.5rem;
+}
+
+.tracker-card {
+    background: var(--card-surface);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 15px var(--shadow-color);
+    margin-bottom: 2rem;
+}
+
+#exercise-status {
+    text-align: center;
+}
+
+.status-text {
+    font-size: 1.2rem;
+    color: var(--text-color);
+    margin-bottom: 1rem;
+}
+
+.exercise-type {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    margin: 1rem 0;
+}
+
+.start-time {
+    color: var(--muted-text);
+    margin-bottom: 1rem;
+}
+
+.btn-large {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+}
+
+.exercise-active {
+    padding: 1rem;
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    border-radius: 12px;
+}
+
+.exercise-completed {
+    padding: 1rem;
+    background: linear-gradient(135deg, #d4edda 0%, #a8e6cf 100%);
+    border-radius: 12px;
+}
+
+.exercise-details {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin: 1rem 0;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+/* Weekly Progress */
+.weekly-progress {
+    background: var(--card-surface);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 15px var(--shadow-color);
+}
+
+.weekly-progress h3 {
+    color: var(--text-color);
+    margin: 0 0 1.5rem;
+    text-align: center;
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 30px;
+    background: var(--card-color);
+    border-radius: 15px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    transition: width 0.5s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+}
+
+.progress-text {
+    text-align: center;
+    color: var(--text-color);
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+.weekly-calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.5rem;
+}
+
+.day-item {
+    background: var(--card-color);
+    border-radius: 8px;
+    padding: 1rem 0.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.day-item.completed {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+}
+
+.day-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.day-status {
+    font-size: 1.5rem;
+}
+
+.day-item.completed .day-status {
+    color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .weekly-calendar {
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0.25rem;
+    }
+    
+    .day-item {
+        padding: 0.75rem 0.25rem;
+    }
+    
+    .day-name {
+        font-size: 0.75rem;
+    }
+    
+    .day-status {
+        font-size: 1.2rem;
+    }
+    
+    .exercise-details {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
