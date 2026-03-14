@@ -229,7 +229,7 @@ else:
 disease_name_map = model_bundle.get("disease_name_map", {})
 normalized_symptom_list = sorted({_normalize_text(symptom) for symptom in symptom_list if _normalize_text(symptom)})
 
-GEMINI_API_KEY = "AIzaSyDoMnzsmVdQC64NSE4sDl-lKxo5dbmoo2Y"
+GEMINI_API_KEY = "Your GEMINI API KEY HERE"
 GEMINI_CLIENT = None
 GEMINI_MODEL_NAME = "gemini-2.5-flash"
 CHAT_STATUS = "fallback"
